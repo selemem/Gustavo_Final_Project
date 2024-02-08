@@ -1,6 +1,6 @@
 package com.example.gustavo_final_project
-
 import android.os.Bundle
+
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Arrangement
@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -26,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -102,19 +102,22 @@ fun CreateAccountContent() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(onClick = { /*TODO*/ }) {
-                    Text("Cancel")
+                }
+                    Text("Create Account")
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(onClick = { /*TODO*/ }) {
-                    Text("Create Account")
+                    Text("Cancel")
                 }
             }
         }
     }
-}
+
 
 @Preview
 @Composable
 fun PreviewCreateAccountContent() {
+    val context = LocalContext.current
     CreateAccountContent()
 }
+
