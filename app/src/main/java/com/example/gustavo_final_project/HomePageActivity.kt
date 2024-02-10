@@ -1,6 +1,7 @@
 package com.example.gustavo_final_project
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -54,11 +55,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-class HomePageActivity : ComponentActivity() {
+class HomePageActivity : ComponentActivity(), MenuItemClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            HomePage()
+            HomePage(this@HomePageActivity)
+        }
+    }
+
+    override fun onItemClick(item: String) {
+        val intent = when (item) {
+            "Entries" -> Intent(this, HomePageActivity::class.java)
+            "Calendar" -> Intent(this, CalendarActivity::class.java)
+            "History" -> Intent(this, HistoryActivity::class.java)
+            "Settings" -> Intent(this, SettingsActivity::class.java)
+            else -> null
+        }
+        intent?.let {
+            it.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(it)
+            finish()
         }
     }
 }
@@ -66,7 +82,7 @@ class HomePageActivity : ComponentActivity() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomePage() {
+fun HomePage(menuItemClickListener: MenuItemClickListener) {
     var showMenu by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -79,11 +95,15 @@ fun HomePage() {
         content = {
             HomeContent()
             if (showMenu) {
-                SideBarMenu(onItemClick = { showMenu = false })
+                SideBarMenu(onItemClick = { item ->
+                    showMenu = false // Close the menu when an item is clicked
+                    menuItemClickListener.onItemClick(item) // Notify the activity
+                })
             }
         }
     )
 }
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -206,8 +226,14 @@ fun SideBarMenu(
 }
 
 
+
 @Preview
 @Composable
 fun PreviewHomePage() {
-    HomePage()
+    val dummyMenuItemClickListener = object : MenuItemClickListener {
+        override fun onItemClick(item: String) {
+            // No action needed for preview
+        }
+    }
+    HomePage(menuItemClickListener = dummyMenuItemClickListener)
 }
