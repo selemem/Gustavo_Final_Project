@@ -10,6 +10,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -37,6 +39,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.material.icons.extended.*
+import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.KeyboardVoice
+import androidx.compose.material.icons.filled.Mic
+
 
 class NewEntryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,6 +55,7 @@ class NewEntryActivity : ComponentActivity() {
     }
 }
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun NewEntryScreen() {
@@ -56,40 +65,62 @@ fun NewEntryScreen() {
         SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
     }
 
-  Column(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = currentDate,
+                        fontSize = 20.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            )
+        },
+        bottomBar = {
+            BottomAppBar(
+                contentColor = Color.Black, // Customize the content color
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                ) {
+                    // Option 1 - Adding pictures
+                    IconButton(onClick = { /* Handle adding pictures */ }) {
+                        Icon(
+                            imageVector = Icons.Filled.AddPhotoAlternate,
+                            contentDescription = "Add pictures"
+                        )
+                    }
+
+                    // Option 2 - Voice to text
+                    IconButton(onClick = { /* Handle voice to text */ }) {
+                        Icon(
+                            imageVector = Icons.Filled.AddAPhoto,
+                            contentDescription = "Voice to text"
+                        )
+                    }
+
+                    // Option 3 - Voice messages
+                    IconButton(onClick = { /* Handle voice messages */ }) {
+                        Icon(
+                            imageVector = Icons.Filled.Mic,
+                            contentDescription = "Voice messages"
+                        )
+                    }
+                }
+            }
+        }
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = currentDate,
-                    fontSize = 20.sp,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold
-                )
-                Row {
-                    TextButton(onClick = { /* Handle "Cancel" button click */ }) {
-                        Text(
-                            text = "Cancel",
-                            color = Color.Black,
-                            fontSize = 16.sp
-                        )
-                    }
-                    TextButton(onClick = { /* Handle "Done" button click */ }) {
-                        Text(
-                            text = "Done",
-                            color = Color.Black,
-                            fontSize = 16.sp
-                        )
-                    }
-                }
-            }
             TextField(
                 value = textState,
                 onValueChange = { textState = it },
@@ -109,3 +140,4 @@ fun NewEntryScreen() {
             )
         }
     }
+}
