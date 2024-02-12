@@ -1,5 +1,6 @@
 package com.example.gustavo_final_project
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -44,7 +45,7 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
 
             if (!showMenu) {
                 HomeContent()
-                AddEntryButton()
+                AddEntryButton(context = this)
             }
         }
     }
@@ -67,7 +68,7 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
 
 
 @Composable
-fun AddEntryButton() {
+fun AddEntryButton(context: Context) {
     Box(
         modifier = Modifier
             .padding(24.dp)
@@ -75,7 +76,11 @@ fun AddEntryButton() {
         contentAlignment = Alignment.BottomEnd
     ) {
         FloatingActionButton(
-            onClick = { /* Handle button click */ },
+            onClick = {
+                // Handle button click, e.g., navigate to NewEntryActivity
+                val intent = Intent(context, NewEntryActivity::class.java)
+                context.startActivity(intent)
+            },
             shape = CircleShape,
             contentColor = Color.Black
         ) {
@@ -86,8 +91,6 @@ fun AddEntryButton() {
         }
     }
 }
-
-
 
 @Composable
 fun HomeContent() {

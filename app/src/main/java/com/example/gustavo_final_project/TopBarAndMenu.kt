@@ -24,8 +24,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -92,7 +94,7 @@ fun SideBarMenu(
     onItemClick: (String) -> Unit // Accepts the click events for each menu item
 ) {
     val options = listOf("Entries", "Calendar", "History", "Settings")
-    val selectedOption = remember { mutableStateOf(options.first()) }
+    var selectedOption by remember { mutableStateOf(options.first()) }
 
     Column(
         modifier = Modifier
@@ -101,16 +103,17 @@ fun SideBarMenu(
             .padding(top = 68.dp, start = 0.dp, end = 0.dp, bottom = 0.dp)
     ) {
         options.forEach { option ->
-            val isSelected = option == selectedOption.value
+            val isSelected = option == selectedOption
             TextButton(
                 onClick = {
-                    selectedOption.value = option
+                    // Update the selected option
+                    selectedOption = option
                     onItemClick(option) // Notify the click event for this menu item
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .background(if (isSelected) Color.LightGray else Color.Transparent),
+                    .background(if (isSelected) Color.Transparent else Color.Transparent),
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = if (isSelected) Color.Black else LocalContentColor.current
                 )
@@ -125,3 +128,5 @@ fun SideBarMenu(
         }
     }
 }
+
+

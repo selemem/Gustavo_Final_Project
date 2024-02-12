@@ -102,7 +102,6 @@ fun CreateAccountContent() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(onClick = { /*TODO*/ }) {
-                }
                     Text("Create Account")
                 }
                 Spacer(modifier = Modifier.width(8.dp))
@@ -112,7 +111,7 @@ fun CreateAccountContent() {
             }
         }
     }
-
+}
 
 @Preview
 @Composable
