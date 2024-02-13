@@ -42,8 +42,10 @@ import java.util.*
 import androidx.compose.material.icons.extended.*
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.KeyboardVoice
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.VoiceChat
 
 
 class NewEntryActivity : ComponentActivity() {
@@ -55,7 +57,6 @@ class NewEntryActivity : ComponentActivity() {
     }
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun NewEntryScreen() {
@@ -65,79 +66,86 @@ fun NewEntryScreen() {
         SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = currentDate,
+                fontSize = 20.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
+            Row {
+                TextButton(onClick = { /* Handle "Cancel" button click */ }) {
                     Text(
-                        text = currentDate,
-                        fontSize = 20.sp,
+                        text = "Cancel",
                         color = Color.Black,
-                        fontWeight = FontWeight.Bold
+                        fontSize = 16.sp
                     )
                 }
-            )
-        },
-        bottomBar = {
-            BottomAppBar(
-                contentColor = Color.Black, // Customize the content color
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                ) {
-                    // Option 1 - Adding pictures
-                    IconButton(onClick = { /* Handle adding pictures */ }) {
-                        Icon(
-                            imageVector = Icons.Filled.AddPhotoAlternate,
-                            contentDescription = "Add pictures"
-                        )
-                    }
-
-                    // Option 2 - Voice to text
-                    IconButton(onClick = { /* Handle voice to text */ }) {
-                        Icon(
-                            imageVector = Icons.Filled.AddAPhoto,
-                            contentDescription = "Voice to text"
-                        )
-                    }
-
-                    // Option 3 - Voice messages
-                    IconButton(onClick = { /* Handle voice messages */ }) {
-                        Icon(
-                            imageVector = Icons.Filled.Mic,
-                            contentDescription = "Voice messages"
-                        )
-                    }
+                TextButton(onClick = { /* Handle "Done" button click */ }) {
+                    Text(
+                        text = "Done",
+                        color = Color.Black,
+                        fontSize = 16.sp
+                    )
                 }
             }
         }
-    ) {
-        Column(
+        TextField(
+            value = textState,
+            onValueChange = { textState = it },
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .fillMaxWidth()
+                .weight(1f),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    keyboardController?.hide()
+                }
+            ),
+            placeholder = { Text(text = "Write your thoughts here...") }
+        )
+// Bottom menu with options
+        BottomNavigation(
+            backgroundColor = Color.White, // Set background color to white
+            contentColor = Color.Black, // Set content color to black
+            elevation = 0.dp // Remove drop shadow
         ) {
-            TextField(
-                value = textState,
-                onValueChange = { textState = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        keyboardController?.hide()
-                    }
-                ),
-                placeholder = { Text(text = "Write your thoughts here...") }
+            BottomNavigationItem(
+                selected = false,
+                onClick = { /* Handle click for adding pictures */ },
+                icon = {
+                    Icon(Icons.Default.AddAPhoto, contentDescription = "Add Pictures")
+                },
             )
+            BottomNavigationItem(
+                selected = false,
+                onClick = { /* Handle click for voice messages */ },
+                icon = {
+                    Icon(Icons.Default.AddReaction, contentDescription = "Mood")
+                },
+            )
+            BottomNavigationItem(
+                selected = false,
+                onClick = { /* Handle click for voice to text */ },
+                icon = {
+                    Icon(Icons.Default.Mic, contentDescription = "Voice")
+                },
+            )
+
         }
     }
 }
