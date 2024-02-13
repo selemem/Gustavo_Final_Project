@@ -12,7 +12,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -53,11 +55,15 @@ import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.KeyboardVoice
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Mood
+import androidx.compose.material.icons.filled.MoodBad
+import androidx.compose.material.icons.filled.SentimentSatisfiedAlt
 import androidx.compose.material.icons.filled.VoiceChat
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.style.TextAlign
 import java.io.InputStream
 
 
@@ -80,6 +86,8 @@ fun NewEntryScreen(activity: Activity) {
         SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
     }
 
+    var expanded by remember { mutableStateOf(false) }
+
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         // Handle the selected image URI here
         // You can use the URI to load the image into the text box or perform other operations
@@ -98,6 +106,14 @@ fun NewEntryScreen(activity: Activity) {
             }
         }
     }
+
+    val moods = listOf(
+        Pair(Icons.Default.MoodBad, Color.Red),
+        Pair(Icons.Default.Mood, Color.Red),
+        Pair(Icons.Default.SentimentSatisfiedAlt, Color.Yellow),
+        Pair(Icons.Default.Mood, Color.Green),
+        Pair(Icons.Default.MoodBad, Color.Green)
+    )
 
     Column(
         modifier = Modifier
@@ -166,7 +182,7 @@ fun NewEntryScreen(activity: Activity) {
             )
             BottomNavigationItem(
                 selected = false,
-                onClick = { /* Handle click for voice messages */ },
+                onClick = { expanded = true },
                 icon = {
                     Icon(Icons.Default.AddReaction, contentDescription = "Mood")
                 },
@@ -186,6 +202,47 @@ fun NewEntryScreen(activity: Activity) {
                     Icon(Icons.Default.Mic, contentDescription = "Voice")
                 },
             )
+        }
+// Dropdown menu for mood selection
+        // Dropdown menu for mood selection
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.width(IntrinsicSize.Min)
+            ) {
+                Text(
+                    text = "How are you feeling today?",
+                    fontSize = 20.sp,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    moods.forEach { (icon, color) ->
+                        IconButton(
+                            onClick = {
+                                textState += " Mood" // Append the selected mood to the existing text
+                                expanded = false
+                            }
+                        ) {
+                            Icon(
+                                icon,
+                                contentDescription = null,
+                                tint = color,
+                                modifier = Modifier.size(72.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
