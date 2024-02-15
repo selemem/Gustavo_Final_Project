@@ -10,11 +10,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -32,6 +36,7 @@ import androidx.compose.ui.unit.sp
 
 class HomePageActivity : ComponentActivity(), MenuItemClickListener {
     private var showMenu by mutableStateOf(false)
+    private var entries = mutableListOf<Entry>() // Maintain a list of entries
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +49,7 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
             )
 
             if (!showMenu) {
-                HomeContent()
+                HomeContent(entries = entries) // Pass the list of entries to HomeContent
                 AddEntryButton(context = this)
             }
         }
@@ -63,6 +68,11 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
             startActivity(it)
             finish()
         }
+    }
+
+    // Function to add a new entry to the list of entries
+    fun addEntry(entry: Entry) {
+        entries.add(entry)
     }
 }
 
@@ -93,29 +103,78 @@ fun AddEntryButton(context: Context) {
 }
 
 @Composable
-fun HomeContent() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(100.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Start journaling",
-            fontSize = 24.sp,
-            color = Color.Black
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Add new entries by tapping on the plus button below.",
-            fontSize = 16.sp,
-            color = Color.Black,
-            textAlign = TextAlign.Center
-        )
+fun HomeContent(entries: List<Entry>) {
+    if (entries.isEmpty()) {
+        // Display the HomeContent if the list of entries is empty
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(100.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Start journaling",
+                fontSize = 24.sp,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Add new entries by tapping on the plus button below.",
+                fontSize = 16.sp,
+                color = Color.Black,
+                textAlign = TextAlign.Center
+            )
+        }
+    } else {
+        // Display the list of Entry cards if entries exist
+        LazyColumn(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            items(entries) { entry ->
+                EntryCard(entry = entry)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
     }
 }
 
+
+@Composable
+fun EntryCard(entry: Entry) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = entry.date,
+                fontSize = 16.sp,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = entry.text,
+                fontSize = 18.sp,
+                color = Color.Black
+            )
+//            Spacer(modifier = Modifier.height(8.dp))
+//            Text(
+//                text = "Mood: ${entry.mood}",
+//                fontSize = 14.sp,
+//                color = Color.Gray
+//            )
+            // Render pictures here
+        }
+    }
+}
+
+// Function to add a new entry to the list of entries
+fun addEntry(entry: Entry, entries: MutableList<Entry>, updateUI: () -> Unit) {
+    entries.add(entry)
+    updateUI()
+}
 
 @Preview
 @Composable

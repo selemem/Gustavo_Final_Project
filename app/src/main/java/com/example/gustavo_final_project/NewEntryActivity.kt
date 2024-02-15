@@ -108,11 +108,11 @@ fun NewEntryScreen(activity: Activity) {
     }
 
     val moods = listOf(
-        Pair(Icons.Default.MoodBad, Color.Red),
-        Pair(Icons.Default.Mood, Color.Red),
-        Pair(Icons.Default.SentimentSatisfiedAlt, Color.Yellow),
-        Pair(Icons.Default.Mood, Color.Green),
-        Pair(Icons.Default.MoodBad, Color.Green)
+        Pair("\uD83D\uDE00", Color.Green),     // 😄
+        Pair("\uD83D\uDE42", Color.Yellow),    // 🙂
+        Pair("\uD83D\uDE10", Color.Red),       // 😐
+        Pair("\uD83D\uDE1E", Color.Green),     // 😞
+        Pair("\uD83D\uDE22", Color.Red),       // 😢
     )
 
     Column(
@@ -133,14 +133,25 @@ fun NewEntryScreen(activity: Activity) {
                 fontWeight = FontWeight.Bold
             )
             Row {
-                TextButton(onClick = { /* Handle "Cancel" button click */ }) {
+                TextButton(onClick = {activity.finish()}) {
                     Text(
                         text = "Cancel",
                         color = Color.Black,
                         fontSize = 16.sp
                     )
                 }
-                TextButton(onClick = { /* Handle "Done" button click */ }) {
+                TextButton(onClick = {
+                    val entryText = textState // Get the text from the text field
+                    val currentDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
+
+                    val intent = Intent().apply {
+                        putExtra("entryText", entryText)
+                        putExtra("date", currentDate)
+                    }
+
+                    activity.setResult(Activity.RESULT_OK, intent) // Set the result to be sent back to the HomePageActivity
+                    activity.finish()
+                }) {
                     Text(
                         text = "Done",
                         color = Color.Black,
@@ -204,7 +215,6 @@ fun NewEntryScreen(activity: Activity) {
             )
         }
 // Dropdown menu for mood selection
-        // Dropdown menu for mood selection
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
@@ -226,18 +236,19 @@ fun NewEntryScreen(activity: Activity) {
                     modifier = Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    moods.forEach { (icon, color) ->
+                    moods.forEach { (emoji, color) ->
                         IconButton(
                             onClick = {
-                                textState += " Mood" // Append the selected mood to the existing text
+                                textState += emoji // Append the selected emoji to the existing text
                                 expanded = false
                             }
                         ) {
-                            Icon(
-                                icon,
-                                contentDescription = null,
-                                tint = color,
-                                modifier = Modifier.size(72.dp)
+                            Text(
+                                text = emoji,
+                                fontSize = 36.sp,
+                                modifier = Modifier.size(72.dp),
+                                textAlign = TextAlign.Center,
+                                color = color
                             )
                         }
                     }
