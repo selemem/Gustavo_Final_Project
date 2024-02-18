@@ -67,7 +67,6 @@ import androidx.compose.ui.text.style.TextAlign
 import java.io.InputStream
 
 
-
 class NewEntryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,7 +80,6 @@ class NewEntryActivity : ComponentActivity() {
 @Composable
 fun NewEntryScreen(activity: Activity) {
     var textState by remember { mutableStateOf("") }
-    val keyboardController = LocalSoftwareKeyboardController.current
     val currentDate = remember {
         SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
     }
@@ -133,7 +131,7 @@ fun NewEntryScreen(activity: Activity) {
                 fontWeight = FontWeight.Bold
             )
             Row {
-                TextButton(onClick = {activity.finish()}) {
+                TextButton(onClick = { activity.finish() }) {
                     Text(
                         text = "Cancel",
                         color = Color.Black,
@@ -141,6 +139,7 @@ fun NewEntryScreen(activity: Activity) {
                     )
                 }
                 TextButton(onClick = {
+                    // Handle "Done" button click
                     val entryText = textState // Get the text from the text field
                     val currentDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
 
@@ -150,7 +149,7 @@ fun NewEntryScreen(activity: Activity) {
                     }
 
                     activity.setResult(Activity.RESULT_OK, intent) // Set the result to be sent back to the HomePageActivity
-                    activity.finish()
+                    activity.finish() // Finish the current activity to go back to the HomePageActivity
                 }) {
                     Text(
                         text = "Done",
@@ -166,15 +165,6 @@ fun NewEntryScreen(activity: Activity) {
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    keyboardController?.hide()
-                }
-            ),
             placeholder = { Text(text = "Write your thoughts here...") }
         )
 
@@ -214,7 +204,7 @@ fun NewEntryScreen(activity: Activity) {
                 },
             )
         }
-// Dropdown menu for mood selection
+        // Dropdown menu for mood selection
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center

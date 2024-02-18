@@ -1,5 +1,6 @@
 package com.example.gustavo_final_project
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
@@ -24,8 +26,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,9 +40,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+@Suppress("DEPRECATION")
 class HomePageActivity : ComponentActivity(), MenuItemClickListener {
     private var showMenu by mutableStateOf(false)
-    private var entries = mutableListOf<Entry>() // Maintain a list of entries
+    private val entries = mutableStateListOf<Entry>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +56,7 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
             )
 
             if (!showMenu) {
-                HomeContent(entries = entries) // Pass the list of entries to HomeContent
+                HomeContent(entries = entries)
                 AddEntryButton(context = this)
             }
         }
@@ -70,12 +77,26 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
         }
     }
 
-    // Function to add a new entry to the list of entries
-    fun addEntry(entry: Entry) {
-        entries.add(entry)
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == NEW_ENTRY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            val entryText = data?.getStringExtra("entryText")
+            val date = data?.getStringExtra("date")
+
+            entryText?.let { text ->
+                date?.let { dateStr ->
+                    val entry = Entry(text, dateStr)
+                    entries.add(entry)
+                }
+            }
+        }
+    }
+
+    companion object {
+        const val NEW_ENTRY_REQUEST_CODE = 1001 // Define your request code
     }
 }
-
 
 @Composable
 fun AddEntryButton(context: Context) {
@@ -87,9 +108,8 @@ fun AddEntryButton(context: Context) {
     ) {
         FloatingActionButton(
             onClick = {
-                // Handle button click, e.g., navigate to NewEntryActivity
                 val intent = Intent(context, NewEntryActivity::class.java)
-                context.startActivity(intent)
+                (context as Activity).startActivityForResult(intent, HomePageActivity.NEW_ENTRY_REQUEST_CODE)
             },
             shape = CircleShape,
             contentColor = Color.Black
@@ -105,35 +125,22 @@ fun AddEntryButton(context: Context) {
 @Composable
 fun HomeContent(entries: List<Entry>) {
     if (entries.isEmpty()) {
-        // Display the HomeContent if the list of entries is empty
+        DefaultContent()
+    } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(100.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(top =50.dp) // Adjust the top padding as needed
         ) {
-            Text(
-                text = "Start journaling",
-                fontSize = 24.sp,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Add new entries by tapping on the plus button below.",
-                fontSize = 16.sp,
-                color = Color.Black,
-                textAlign = TextAlign.Center
-            )
-        }
-    } else {
-        // Display the list of Entry cards if entries exist
-        LazyColumn(
-            modifier = Modifier.padding(8.dp)
-        ) {
-            items(entries) { entry ->
-                EntryCard(entry = entry)
-                Spacer(modifier = Modifier.height(8.dp))
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                items(entries) { entry ->
+                    EntryCard(entry)
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
     }
@@ -141,39 +148,27 @@ fun HomeContent(entries: List<Entry>) {
 
 
 @Composable
-fun EntryCard(entry: Entry) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
+fun DefaultContent() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(100.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = entry.date,
-                fontSize = 16.sp,
-                color = Color.Gray
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = entry.text,
-                fontSize = 18.sp,
-                color = Color.Black
-            )
-//            Spacer(modifier = Modifier.height(8.dp))
-//            Text(
-//                text = "Mood: ${entry.mood}",
-//                fontSize = 14.sp,
-//                color = Color.Gray
-//            )
-            // Render pictures here
-        }
+        Text(
+            text = "Start journaling",
+            fontSize = 24.sp,
+            color = Color.Black
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Add new entries by tapping on the plus button below.",
+            fontSize = 16.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Center
+        )
     }
-}
-
-// Function to add a new entry to the list of entries
-fun addEntry(entry: Entry, entries: MutableList<Entry>, updateUI: () -> Unit) {
-    entries.add(entry)
-    updateUI()
 }
 
 @Preview
