@@ -40,7 +40,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-@Suppress("DEPRECATION")
 class HomePageActivity : ComponentActivity(), MenuItemClickListener {
     private var showMenu by mutableStateOf(false)
     private val entries = mutableStateListOf<Entry>()
@@ -56,10 +55,16 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
             )
 
             if (!showMenu) {
-                HomeContent(entries = entries)
+                HomeContent(entries = entries, onItemClick = this@HomePageActivity::onEntryClick)
                 AddEntryButton(context = this)
             }
         }
+    }
+
+    private fun onEntryClick(entry: Entry) {
+        val intent = Intent(this, NewEntryActivity::class.java)
+        intent.putExtra("entry", entry)
+        startActivity(intent)
     }
 
     override fun onItemClick(item: String) {
@@ -98,6 +103,7 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
     }
 }
 
+
 @Composable
 fun AddEntryButton(context: Context) {
     Box(
@@ -123,14 +129,14 @@ fun AddEntryButton(context: Context) {
 }
 
 @Composable
-fun HomeContent(entries: List<Entry>) {
+fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
     if (entries.isEmpty()) {
         DefaultContent()
     } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top =50.dp) // Adjust the top padding as needed
+                .padding(top = 50.dp) // Adjust the top padding as needed
         ) {
             LazyColumn(
                 modifier = Modifier
@@ -138,13 +144,14 @@ fun HomeContent(entries: List<Entry>) {
                     .padding(16.dp)
             ) {
                 items(entries) { entry ->
-                    EntryCard(entry)
+                    EntryCard(entry, onItemClick)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
     }
 }
+
 
 
 @Composable

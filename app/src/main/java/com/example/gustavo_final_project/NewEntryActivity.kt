@@ -67,19 +67,21 @@ import androidx.compose.ui.text.style.TextAlign
 import java.io.InputStream
 
 
+@Suppress("DEPRECATION")
 class NewEntryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NewEntryScreen(this@NewEntryActivity)
+            val entry = intent.getParcelableExtra<Entry>("entry") // Retrieve the entry from intent extras
+            NewEntryScreen(this@NewEntryActivity, entry)
         }
     }
 }
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun NewEntryScreen(activity: Activity) {
-    var textState by remember { mutableStateOf("") }
+fun NewEntryScreen(activity: Activity, entry: Entry?) {
+    var textState by remember { mutableStateOf(entry?.text ?: "") } // Set initial text to entry's text if available
     val currentDate = remember {
         SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
     }
