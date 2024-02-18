@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.io.Serializable
 
@@ -63,7 +64,11 @@ fun EntryCard(entry: Entry, onItemClick: (Entry) -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = entry.date, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = entry.text)
+            Text(
+                text = entry.text,
+                maxLines = 1, // Limit to one line
+                overflow = TextOverflow.Ellipsis // Truncate overflowed text with ellipsis
+            )
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
