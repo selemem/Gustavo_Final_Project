@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.CalendarView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -13,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import java.util.Calendar
@@ -62,7 +64,7 @@ class CalendarActivity : ComponentActivity(), MenuItemClickListener {
         val intent = when (item) {
             "Entries" -> Intent(this, HomePageActivity::class.java)
             "Calendar" -> Intent(this, CalendarActivity::class.java)
-            "Mood" -> Intent(this, MoodActivity::class.java)
+            "History" -> Intent(this, MoodActivity::class.java)
             "Settings" -> Intent(this, SettingsActivity::class.java)
             else -> null
         }

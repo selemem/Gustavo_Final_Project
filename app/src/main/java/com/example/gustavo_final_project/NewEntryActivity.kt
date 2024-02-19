@@ -1,60 +1,39 @@
 package com.example.gustavo_final_project
 
-import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.Intent
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.material.icons.extended.*
 import androidx.compose.material.icons.filled.AddAPhoto
-import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.AddReaction
-import androidx.compose.material.icons.filled.KeyboardVoice
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.text.style.TextAlign
 
 
@@ -64,7 +43,7 @@ class NewEntryActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val entry = intent.getParcelableExtra<Entry>("entry") // Retrieve the entry from intent extras
-            NewEntryScreen(this@NewEntryActivity, entry) { entryText, currentDate ->
+            NewEntryScreen(this@NewEntryActivity, entry) { entryText, currentDate, selectedMood ->
                 // Add the entry to the map with the current date
                 val dateInMillis = Calendar.getInstance().timeInMillis
                 entriesByDate[dateInMillis] = Entry(entryText, currentDate)
@@ -73,12 +52,12 @@ class NewEntryActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewEntryScreen(
     activity: Activity,
     entry: Entry?,
-    onEntryAdded: (String, String) -> Unit
+    onEntryAdded: (String, String, String?) -> Unit // Add a parameter for mood
 ) {
     var textState by remember { mutableStateOf(entry?.text ?: "") } // Set initial text to entry's text if available
     val currentDate = remember {
@@ -86,6 +65,7 @@ fun NewEntryScreen(
     }
 
     var expanded by remember { mutableStateOf(false) }
+    var selectedMood by remember { mutableStateOf<String?>(null) } // Store the selected mood
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         // Handle the selected image URI here
@@ -107,11 +87,11 @@ fun NewEntryScreen(
     }
 
     val moods = listOf(
-        Pair("\uD83D\uDE00", Color.Green),     // 😄
-        Pair("\uD83D\uDE42", Color.Yellow),    // 🙂
-        Pair("\uD83D\uDE10", Color.Red),       // 😐
-        Pair("\uD83D\uDE1E", Color.Green),     // 😞
-        Pair("\uD83D\uDE22", Color.Red),       // 😢
+        Pair("\uD83D\uDE00", "😄"),     // 😄
+        Pair("\uD83D\uDE42", "🙂"),    // 🙂
+        Pair("\uD83D\uDE10", "😐"),       // 😐
+        Pair("\uD83D\uDE1E", "😞"),     // 😞
+        Pair("\uD83D\uDE22", "😢"),       // 😢
     )
 
     Column(
@@ -145,7 +125,7 @@ fun NewEntryScreen(
                     val currentDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
 
                     // Call the callback to add the entry to the map
-                    onEntryAdded(entryText, currentDate)
+                    onEntryAdded(entryText, currentDate, selectedMood) // Pass the selected mood
 
                     val intent = Intent().apply {
                         putExtra("entryText", entryText)
@@ -163,6 +143,25 @@ fun NewEntryScreen(
                 }
             }
         }
+
+        // Mood selection section
+        selectedMood?.let { mood ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+            ) {
+                Text(
+                    text = "Today I'm feeling: $mood",
+                    fontSize = 24.sp,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+
+        // TextField for entering thoughts
         TextField(
             value = textState,
             onValueChange = { textState = it },
@@ -230,10 +229,10 @@ fun NewEntryScreen(
                     modifier = Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    moods.forEach { (emoji, color) ->
+                    moods.forEach { (emoji, mood) ->
                         IconButton(
                             onClick = {
-                                textState += emoji // Append the selected emoji to the existing text
+                                selectedMood = mood // Set the selected mood
                                 expanded = false
                             }
                         ) {
@@ -242,7 +241,7 @@ fun NewEntryScreen(
                                 fontSize = 36.sp,
                                 modifier = Modifier.size(72.dp),
                                 textAlign = TextAlign.Center,
-                                color = color
+                                color = Color.Black
                             )
                         }
                     }
