@@ -8,17 +8,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
-class HistoryActivity : ComponentActivity(), MenuItemClickListener {
+class MoodActivity : ComponentActivity(), MenuItemClickListener {
     private var showMenu by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             TopBarAndMenu(
-                title = "History",
+                title = "Mood Tracking",
                 onMenuClick = { showMenu = !showMenu },
                 showMenu = showMenu,
-                onItemClick = this@HistoryActivity::onItemClick
+                onItemClick = this@MoodActivity::onItemClick
             )
         }
     }
@@ -27,7 +27,7 @@ class HistoryActivity : ComponentActivity(), MenuItemClickListener {
         val intent = when (item) {
             "Entries" -> Intent(this, HomePageActivity::class.java)
             "Calendar" -> Intent(this, CalendarActivity::class.java)
-            "History" -> Intent(this, HistoryActivity::class.java)
+            "Mood" -> Intent(this, MoodActivity::class.java)
             "Settings" -> Intent(this, SettingsActivity::class.java)
             else -> null
         }

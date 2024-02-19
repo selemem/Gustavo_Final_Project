@@ -93,7 +93,7 @@ fun TopBarAndMenu(
 fun SideBarMenu(
     onItemClick: (String) -> Unit // Accepts the click events for each menu item
 ) {
-    val options = listOf("Entries", "Calendar", "History", "Settings")
+    val options = listOf("Entries", "Calendar", "Mood", "Settings")
     var selectedOption by remember { mutableStateOf(options.first()) }
 
     Column(
