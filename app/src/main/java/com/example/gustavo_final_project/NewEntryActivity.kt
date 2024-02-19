@@ -55,16 +55,7 @@ import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.KeyboardVoice
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Mood
-import androidx.compose.material.icons.filled.MoodBad
-import androidx.compose.material.icons.filled.SentimentSatisfiedAlt
-import androidx.compose.material.icons.filled.VoiceChat
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextAlign
-import java.io.InputStream
 
 
 @Suppress("DEPRECATION")
@@ -73,14 +64,22 @@ class NewEntryActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val entry = intent.getParcelableExtra<Entry>("entry") // Retrieve the entry from intent extras
-            NewEntryScreen(this@NewEntryActivity, entry)
+            NewEntryScreen(this@NewEntryActivity, entry) { entryText, currentDate ->
+                // Add the entry to the map with the current date
+                val dateInMillis = Calendar.getInstance().timeInMillis
+                entriesByDate[dateInMillis] = Entry(entryText, currentDate)
+            }
         }
     }
 }
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun NewEntryScreen(activity: Activity, entry: Entry?) {
+fun NewEntryScreen(
+    activity: Activity,
+    entry: Entry?,
+    onEntryAdded: (String, String) -> Unit
+) {
     var textState by remember { mutableStateOf(entry?.text ?: "") } // Set initial text to entry's text if available
     val currentDate = remember {
         SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
@@ -144,6 +143,9 @@ fun NewEntryScreen(activity: Activity, entry: Entry?) {
                     // Handle "Done" button click
                     val entryText = textState // Get the text from the text field
                     val currentDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
+
+                    // Call the callback to add the entry to the map
+                    onEntryAdded(entryText, currentDate)
 
                     val intent = Intent().apply {
                         putExtra("entryText", entryText)
