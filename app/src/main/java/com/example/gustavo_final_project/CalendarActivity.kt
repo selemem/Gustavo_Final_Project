@@ -1,5 +1,6 @@
 package com.example.gustavo_final_project
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
@@ -10,11 +11,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import java.util.Calendar
@@ -40,6 +42,7 @@ class CalendarActivity : ComponentActivity(), MenuItemClickListener {
 
             // Display the content only if isContentVisible is true
             if (isContentVisible) {
+                val calendarView = remember { CalendarView(this) } // Remember the CalendarView instance
                 CalendarView(
                     modifier = Modifier
                         .fillMaxSize()
@@ -53,6 +56,9 @@ class CalendarActivity : ComponentActivity(), MenuItemClickListener {
                         startActivity(intent)
                     }
                 }
+
+                // Update the calendar with entries
+                updateCalendarWithEntries(calendarView)
             }
         }
     }
@@ -137,6 +143,3 @@ fun markDate(year: Int, month: Int, dayOfMonth: Int, calendarView: CalendarView)
     // Mark the date on the calendar view
     calendarView.setDate(markedDateInMillis, true, isToday)
 }
-
-
-
