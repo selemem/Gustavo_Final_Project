@@ -36,7 +36,6 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.text.style.TextAlign
 
-
 @Suppress("DEPRECATION")
 class NewEntryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,7 +45,16 @@ class NewEntryActivity : ComponentActivity() {
             NewEntryScreen(this@NewEntryActivity, entry) { entryText, currentDate, selectedMood ->
                 // Add the entry to the map with the current date
                 val dateInMillis = Calendar.getInstance().timeInMillis
-                entriesByDate[dateInMillis] = Entry(entryText, currentDate)
+                entriesByDate[dateInMillis] = Entry(entryText, currentDate, selectedMood)
+
+                // Pass the mood information back to the caller
+                val intent = Intent().apply {
+                    putExtra("entryText", entryText)
+                    putExtra("date", currentDate)
+                    putExtra("mood", selectedMood) // Pass the selected mood
+                }
+                setResult(Activity.RESULT_OK, intent)
+                finish()
             }
         }
     }

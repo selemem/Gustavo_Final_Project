@@ -64,7 +64,7 @@ class CalendarActivity : ComponentActivity(), MenuItemClickListener {
         val intent = when (item) {
             "Entries" -> Intent(this, HomePageActivity::class.java)
             "Calendar" -> Intent(this, CalendarActivity::class.java)
-            "History" -> Intent(this, MoodActivity::class.java)
+            "Mood" -> Intent(this, MoodActivity::class.java)
             "Settings" -> Intent(this, SettingsActivity::class.java)
             else -> null
         }

@@ -64,8 +64,8 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
     override fun onItemClick(item: String) {
         val intent = when (item) {
             "Entries" -> Intent(this, HomePageActivity::class.java)
-            "Mood" -> Intent(this, CalendarActivity::class.java)
-            "History" -> Intent(this, MoodActivity::class.java)
+            "Calendar" -> Intent(this, CalendarActivity::class.java)
+            "Mood" -> Intent(this, MoodActivity::class.java)
             "Settings" -> Intent(this, SettingsActivity::class.java)
             else -> null
         }
@@ -76,16 +76,16 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
         }
     }
 
-    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == NEW_ENTRY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val entryText = data?.getStringExtra("entryText")
             val date = data?.getStringExtra("date")
+            val mood = data?.getStringExtra("mood") // Retrieve mood information
 
             entryText?.let { text ->
                 date?.let { dateStr ->
-                    val entry = Entry(text, dateStr)
+                    val entry = Entry(text, dateStr, mood) // Include mood in the Entry object
                     entries.add(entry)
                 }
             }
