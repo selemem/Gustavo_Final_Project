@@ -63,7 +63,19 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
     private fun addEntry(entry: Entry) {
         entries.add(entry)
         saveEntries(this, entries)
+        // If mood is not null, update the mood data in MoodActivity
+        entry.mood?.let { mood ->
+            updateMoodDataInMoodActivity(mood)
+        }
     }
+
+    private fun updateMoodDataInMoodActivity(mood: String) {
+        val intent = Intent(this, MoodActivity::class.java)
+        intent.putExtra("updateEntries", true)
+        intent.putExtra("mood", mood)
+        startActivity(intent)
+    }
+
     private fun onEntryClick(entry: Entry) {
         val intent = Intent(this, NewEntryActivity::class.java)
         intent.putExtra("entry", entry)
@@ -95,27 +107,12 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
             entryText?.let { text ->
                 date?.let { dateStr ->
                     val entry = Entry(text, dateStr, mood) // Include mood in the Entry object
-                    entries.add(entry)
-                    saveEntries(this, entries) // Save the new entry immediately
-                    // Update the UI to reflect the new entry
-                    entries = loadEntries(this).toMutableList() // Reload entries from SharedPreferences
-                    setContent {
-                        TopBarAndMenu(
-                            title = "Daily Journal",
-                            onMenuClick = { showMenu = !showMenu },
-                            showMenu = showMenu,
-                            onItemClick = this@HomePageActivity::onItemClick
-                        )
-
-                        if (!showMenu) {
-                            HomeContent(entries = entries, onItemClick = this@HomePageActivity::onEntryClick)
-                            AddEntryButton(context = this)
-                        }
-                    }
+                    addEntry(entry) // Add the entry
                 }
             }
         }
     }
+
 
 
 
@@ -199,6 +196,8 @@ fun DefaultContent() {
         )
     }
 }
+
+
 
 @Preview
 @Composable
