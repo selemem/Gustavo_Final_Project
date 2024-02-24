@@ -38,10 +38,12 @@ import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflec
 
 class HomePageActivity : ComponentActivity(), MenuItemClickListener {
     private var showMenu by mutableStateOf(false)
-    private val entries = mutableStateListOf<Entry>()
+    private lateinit var entries: MutableList<Entry>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        entries = loadEntries(this).toMutableList()
+
         setContent {
             TopBarAndMenu(
                 title = "Daily Journal",
@@ -57,6 +59,11 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
         }
     }
 
+    // Method to add an entry
+    private fun addEntry(entry: Entry) {
+        entries.add(entry)
+        saveEntries(this, entries)
+    }
     private fun onEntryClick(entry: Entry) {
         val intent = Intent(this, NewEntryActivity::class.java)
         intent.putExtra("entry", entry)
@@ -89,10 +96,29 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
                 date?.let { dateStr ->
                     val entry = Entry(text, dateStr, mood) // Include mood in the Entry object
                     entries.add(entry)
+                    saveEntries(this, entries) // Save the new entry immediately
+                    // Update the UI to reflect the new entry
+                    entries = loadEntries(this).toMutableList() // Reload entries from SharedPreferences
+                    setContent {
+                        TopBarAndMenu(
+                            title = "Daily Journal",
+                            onMenuClick = { showMenu = !showMenu },
+                            showMenu = showMenu,
+                            onItemClick = this@HomePageActivity::onItemClick
+                        )
+
+                        if (!showMenu) {
+                            HomeContent(entries = entries, onItemClick = this@HomePageActivity::onEntryClick)
+                            AddEntryButton(context = this)
+                        }
+                    }
                 }
             }
         }
     }
+
+
+
 
     companion object {
         const val NEW_ENTRY_REQUEST_CODE = 1001 // Define your request code

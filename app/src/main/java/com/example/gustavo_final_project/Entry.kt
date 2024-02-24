@@ -1,5 +1,6 @@
 package com.example.gustavo_final_project
 
+import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.compose.foundation.BorderStroke
@@ -23,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import java.io.Serializable
 
 data class Entry(
@@ -90,6 +93,28 @@ fun EntryCard(entry: Entry, onItemClick: (Entry) -> Unit) {
         }
     }
 }
+
+fun saveEntries(context: Context, entries: List<Entry>) {
+    val sharedPreferences = context.getSharedPreferences("Entries", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+    val gson = Gson()
+    val json = gson.toJson(entries)
+    editor.putString("entries", json)
+    editor.apply()
+}
+
+fun loadEntries(context: Context): List<Entry> {
+    val sharedPreferences = context.getSharedPreferences("Entries", Context.MODE_PRIVATE)
+    val gson = Gson()
+    val json = sharedPreferences.getString("entries", "")
+    val type = object : TypeToken<List<Entry>>() {}.type
+    return gson.fromJson(json, type) ?: emptyList()
+}
+
+
+
+
+
 
 
 
