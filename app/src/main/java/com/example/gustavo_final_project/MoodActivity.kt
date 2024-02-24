@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.gson.Gson
@@ -142,6 +144,7 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
 @Composable
 fun BarGraph(moodData: MoodData) {
     val entries = moodData.moodCounts.entries.toList()
+    val totalCount = entries.sumBy { it.value } // Calculate the total count of moods
     val maxValue = entries.maxByOrNull { it.value }?.value ?: 0
 
     Column(
@@ -149,6 +152,31 @@ fun BarGraph(moodData: MoodData) {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
+        // Display the total count of moods in a gray-bordered box at the top
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row (verticalAlignment = Alignment.CenterVertically){
+                Text(
+                    text = "Total reactions: ",
+                    fontSize = 24.sp,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "$totalCount",
+                    fontSize = 20.sp,
+                    color = Color.Black
+                )
+            }
+
+        }
+
         entries.forEach { (mood, count) ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -158,29 +186,26 @@ fun BarGraph(moodData: MoodData) {
                 Text(
                     text = mood,
                     modifier = Modifier.padding(end = 8.dp),
-                    fontSize = 30.sp
+                    fontSize = 24.sp
                 )
                 // Create a thicker bar with rounded corners
                 LinearProgressIndicator(
                     progress = count.toFloat() / maxValue,
                     modifier = Modifier
                         .weight(1f) // Ensure the bar takes the remaining space
-                        .height(30.dp) // Adjust the height as needed for thicker bars
+                        .height(18.dp) // Adjust the height as needed for thicker bars
                         .clip(RoundedCornerShape(8.dp)) // Round the corners
                 )
                 // Display the count of occurrences
                 Text(
                     text = count.toString(),
-                    fontSize = 24.sp,
+                    fontSize = 18.sp,
                     modifier = Modifier.padding(start = 8.dp) // Add padding between the bar and the count
                 )
             }
         }
     }
 }
-
-
-
 
 
 // Helper function to collect mood data from entries
