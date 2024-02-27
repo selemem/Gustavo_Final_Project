@@ -43,10 +43,7 @@ class NewEntryActivity : ComponentActivity() {
         setContent {
             val entry = intent.getParcelableExtra<Entry>("entry") // Retrieve the entry from intent extras
             NewEntryScreen(this@NewEntryActivity, entry) { entryText, currentDate, selectedMood ->
-                // Add the entry to the map with the current date
-                val dateInMillis = Calendar.getInstance().timeInMillis
-                entriesByDate[dateInMillis] = Entry(entryText, currentDate, selectedMood)
-
+1
                 // Pass the mood information back to the caller
                 val intent = Intent().apply {
                     putExtra("entryText", entryText)

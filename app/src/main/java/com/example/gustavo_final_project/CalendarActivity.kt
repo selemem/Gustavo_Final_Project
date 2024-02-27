@@ -2,22 +2,39 @@ package com.example.gustavo_final_project
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.view.ViewGroup
 import android.widget.CalendarView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.material.datepicker.DayViewDecorator
+import org.intellij.lang.annotations.JdkConstants
+import java.text.SimpleDateFormat
 import java.util.Calendar
-
+import java.util.Locale
 
 class CalendarActivity : ComponentActivity(), MenuItemClickListener {
 
@@ -39,23 +56,11 @@ class CalendarActivity : ComponentActivity(), MenuItemClickListener {
 
             // Display the content only if isContentVisible is true
             if (isContentVisible) {
-                val calendarView = remember { CalendarView(this) } // Remember the CalendarView instance
                 CalendarView(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(top = 60.dp, start = 0.dp, end = 0.dp, bottom = 0.dp)
-                ) { selectedDateInMillis ->
-                    val entry = entriesByDate[selectedDateInMillis]
-                    if (entry != null) {
-                        val intent = Intent(this@CalendarActivity, NewEntryActivity::class.java).apply {
-                            putExtra("entry", entry)
-                        }
-                        startActivity(intent)
-                    }
-                }
-
-                // Update the calendar with entries
-                updateCalendarWithEntries(calendarView, entriesByDate)
+                )
             }
         }
     }
@@ -104,39 +109,3 @@ fun CalendarView(
         }
     )
 }
-
-val entriesByDate = mutableMapOf<Long, Entry>()
-fun updateCalendarWithEntries(calendarView: CalendarView, entriesByDate: Map<Long, Entry>) {
-    // Iterate through entriesByDate and mark each date on the calendar
-    entriesByDate.keys.forEach { dateInMillis ->
-        val calendar = Calendar.getInstance().apply {
-            timeInMillis = dateInMillis
-        }
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
-        markDate(year, month, dayOfMonth, calendarView)
-    }
-}
-
-fun markDate(year: Int, month: Int, dayOfMonth: Int, calendarView: CalendarView) {
-    // Get the current date in milliseconds
-    val currentDate = Calendar.getInstance()
-    val currentYear = currentDate.get(Calendar.YEAR)
-    val currentMonth = currentDate.get(Calendar.MONTH)
-    val currentDayOfMonth = currentDate.get(Calendar.DAY_OF_MONTH)
-
-    // Set the date for marking
-    val markedDate = Calendar.getInstance()
-    markedDate.set(year, month, dayOfMonth)
-
-    // Check if the date to mark is today
-    val isToday = year == currentYear && month == currentMonth && dayOfMonth == currentDayOfMonth
-
-    // Get the time in milliseconds for the marked date
-    val markedDateInMillis = markedDate.timeInMillis
-
-    // Mark the date on the calendar view
-    calendarView.setDate(markedDateInMillis, true, isToday)
-}
-

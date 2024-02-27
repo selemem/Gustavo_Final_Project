@@ -62,17 +62,6 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
         }
     }
 
-    // Method to add an entry
-//    private fun addEntry(entry: Entry) {
-//        entries.add(entry)
-//        saveEntries(this, entries)
-//
-//        // Update the entriesByDate map with the new entry's date
-//        val calendar = Calendar.getInstance()
-//        calendar.timeInMillis = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).parse(entry.date)!!.time
-//        entriesByDate[calendar.timeInMillis] = entry
-//    }
-
     private fun onEntryClick(entry: Entry) {
         val intent = Intent(this, NewEntryActivity::class.java)
         intent.putExtra("entry", entry)
@@ -107,10 +96,6 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
                     entries.add(entry) // Add the entry to the list of entries
                     saveEntries(this, entries) // Save the entries
 
-                    // Update the entriesByDate map with the new entry's date
-                    val calendar = Calendar.getInstance()
-                    calendar.timeInMillis = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).parse(dateStr)!!.time
-                    entriesByDate[calendar.timeInMillis] = entry
 
                     // Update the UI to reflect the new entry
                     entries = loadEntries(this).toMutableList() // Reload entries from SharedPreferences
