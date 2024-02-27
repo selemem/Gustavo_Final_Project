@@ -107,21 +107,13 @@ fun CalendarView(
     )
 }
 
-
 val entriesByDate = mutableMapOf<Long, Entry>()
 fun updateCalendarWithEntries(calendarView: CalendarView) {
-    // Assuming entriesByDate is a map of date in milliseconds to Entry object
-    // Here, you need to iterate through entriesByDate and mark each date on the calendar
     for ((dateInMillis, _) in entriesByDate) {
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = dateInMillis
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH)
-        val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
-        // Assuming the markDate function is defined elsewhere
-        markDate(year, month, dayOfMonth, calendarView)
+        calendarView.setDate(dateInMillis, true, false)
     }
 }
+
 
 fun markDate(year: Int, month: Int, dayOfMonth: Int, calendarView: CalendarView) {
     // Get the current date in milliseconds
@@ -143,3 +135,4 @@ fun markDate(year: Int, month: Int, dayOfMonth: Int, calendarView: CalendarView)
     // Mark the date on the calendar view
     calendarView.setDate(markedDateInMillis, true, isToday)
 }
+
