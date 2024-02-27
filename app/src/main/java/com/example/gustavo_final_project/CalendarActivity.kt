@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.material.datepicker.DayViewDecorator
 import java.util.Calendar
 
 
@@ -58,10 +59,11 @@ class CalendarActivity : ComponentActivity(), MenuItemClickListener {
                 }
 
                 // Update the calendar with entries
-                updateCalendarWithEntries(calendarView)
+                updateCalendarWithEntries(calendarView, entriesByDate)
             }
         }
     }
+
 
     override fun onItemClick(item: String) {
         // Hide content when the menu is clicked
@@ -108,12 +110,18 @@ fun CalendarView(
 }
 
 val entriesByDate = mutableMapOf<Long, Entry>()
-fun updateCalendarWithEntries(calendarView: CalendarView) {
-    for ((dateInMillis, _) in entriesByDate) {
-        calendarView.setDate(dateInMillis, true, false)
+fun updateCalendarWithEntries(calendarView: CalendarView, entriesByDate: Map<Long, Entry>) {
+    // Iterate through entriesByDate and mark each date on the calendar
+    entriesByDate.keys.forEach { dateInMillis ->
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = dateInMillis
+        }
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        markDate(year, month, dayOfMonth, calendarView)
     }
 }
-
 
 fun markDate(year: Int, month: Int, dayOfMonth: Int, calendarView: CalendarView) {
     // Get the current date in milliseconds

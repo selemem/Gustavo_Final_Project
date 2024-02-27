@@ -35,6 +35,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class HomePageActivity : ComponentActivity(), MenuItemClickListener {
     private var showMenu by mutableStateOf(false)
@@ -60,10 +63,15 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
     }
 
     // Method to add an entry
-    private fun addEntry(entry: Entry) {
-        entries.add(entry)
-        saveEntries(this, entries)
-    }
+//    private fun addEntry(entry: Entry) {
+//        entries.add(entry)
+//        saveEntries(this, entries)
+//
+//        // Update the entriesByDate map with the new entry's date
+//        val calendar = Calendar.getInstance()
+//        calendar.timeInMillis = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).parse(entry.date)!!.time
+//        entriesByDate[calendar.timeInMillis] = entry
+//    }
 
     private fun onEntryClick(entry: Entry) {
         val intent = Intent(this, NewEntryActivity::class.java)
@@ -96,8 +104,14 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
             entryText?.let { text ->
                 date?.let { dateStr ->
                     val entry = Entry(text, dateStr, mood) // Include mood in the Entry object
-                    entries.add(entry)
-                    saveEntries(this, entries) // Save the new entry immediately
+                    entries.add(entry) // Add the entry to the list of entries
+                    saveEntries(this, entries) // Save the entries
+
+                    // Update the entriesByDate map with the new entry's date
+                    val calendar = Calendar.getInstance()
+                    calendar.timeInMillis = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).parse(dateStr)!!.time
+                    entriesByDate[calendar.timeInMillis] = entry
+
                     // Update the UI to reflect the new entry
                     entries = loadEntries(this).toMutableList() // Reload entries from SharedPreferences
                     setContent {
@@ -117,9 +131,6 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
             }
         }
     }
-
-
-
 
     companion object {
         const val NEW_ENTRY_REQUEST_CODE = 1001 // Define your request code
@@ -156,6 +167,9 @@ fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
     if (entries.isEmpty()) {
         DefaultContent()
     } else {
+        // Sort entries by date in ascending order (oldest to newest)
+        val sortedEntries = entries.sortedBy { SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).parse(it.date) }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -166,7 +180,7 @@ fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                items(entries) { entry ->
+                items(sortedEntries) { entry ->
                     EntryCard(entry, onItemClick)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -174,8 +188,6 @@ fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
         }
     }
 }
-
-
 
 @Composable
 fun DefaultContent() {
