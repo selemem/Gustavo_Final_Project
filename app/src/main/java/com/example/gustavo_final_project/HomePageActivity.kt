@@ -167,8 +167,8 @@ fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
     if (entries.isEmpty()) {
         DefaultContent()
     } else {
-        // Sort entries by date in ascending order (oldest to newest)
-        val sortedEntries = entries.sortedBy { SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).parse(it.date) }
+        // Sort entries by date in descending order (newest to oldest)
+        val sortedEntries = entries.sortedByDescending { SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).parse(it.date) }
 
         Column(
             modifier = Modifier
@@ -188,6 +188,7 @@ fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
         }
     }
 }
+
 
 @Composable
 fun DefaultContent() {

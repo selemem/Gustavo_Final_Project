@@ -110,11 +110,3 @@ fun loadEntries(context: Context): List<Entry> {
     val type = object : TypeToken<List<Entry>>() {}.type
     return gson.fromJson(json, type) ?: emptyList()
 }
-
-
-
-
-
-
-
-
