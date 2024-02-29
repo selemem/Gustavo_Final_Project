@@ -121,9 +121,8 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
 
     if (!showMenu) {
         Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize() .padding(top = 50.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             if (entries.isEmpty()) {
                 Text(
@@ -180,7 +179,7 @@ fun BarGraph(moodData: MoodData) {
         entries.forEach { (mood, count) ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 16.dp) // Add more space between bars
+                modifier = Modifier.padding(vertical = 12.dp) // Add more space between bars
             ) {
                 // Place the emoji in front of the bar
                 Text(

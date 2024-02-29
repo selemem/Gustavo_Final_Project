@@ -169,7 +169,9 @@ fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
         DefaultContent()
     } else {
         // Sort entries by date in descending order (newest to oldest)
-        val sortedEntries = entries.sortedByDescending { SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).parse(it.date) }
+        val sortedEntries = entries.sortedByDescending {
+            SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).parse(it.date) // Combine date and time if available
+        }
 
         Column(
             modifier = Modifier
