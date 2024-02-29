@@ -58,6 +58,26 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
         }
     }
 
+    // Method to add an entry
+    private fun addEntry(entry: Entry) {
+        entries.add(entry)
+        saveEntries(this, entries)
+        // If mood is not null, update the mood data in MoodActivity
+        entry.mood?.let { mood ->
+            updateMoodDataInMoodActivity(mood)
+        }
+    }
+
+    private fun updateMoodDataInMoodActivity(mood: String) {
+        // Only start the activity if mood is not null
+        if (mood.isNotEmpty()) {
+            val intent = Intent(this, MoodActivity::class.java)
+            intent.putExtra("updateEntries", true)
+            intent.putExtra("mood", mood)
+            startActivity(intent)
+        }
+    }
+
     private fun onEntryClick(entry: Entry) {
         val intent = Intent(this, NewEntryActivity::class.java)
         intent.putExtra("entry", entry)
@@ -89,7 +109,7 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
             entryText?.let { text ->
                 date?.let { dateStr ->
                     val entry = Entry(text, dateStr, mood) // Include mood in the Entry object
-                    entries.add(entry) // Add the entry to the list of entries
+                    addEntry(entry)// Add the entry
                     saveEntries(this, entries) // Save the entries
 
 
