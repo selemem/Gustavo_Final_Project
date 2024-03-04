@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Divider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +28,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -79,8 +86,6 @@ class MoodActivity : ComponentActivity(), MenuItemClickListener {
     }
 
 
-
-
     override fun onItemClick(item: String) {
         val intent = when (item) {
             "Entries" -> Intent(this, HomePageActivity::class.java)
@@ -121,8 +126,9 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
 
     if (!showMenu) {
         Column(
-            modifier = Modifier.fillMaxSize() .padding(top = 50.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (entries.isEmpty()) {
                 Text(
@@ -131,7 +137,11 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
                     color = Color.Black
                 )
             } else {
-                BarGraph(moodData)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    BarGraph(moodData)
+                    Divider(modifier = Modifier.padding(top = 0.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)) // Add a divider
+                    LineChart(moodData)
+                }
             }
         }
     } else {
@@ -139,6 +149,88 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
         Box(modifier = Modifier.fillMaxSize())
     }
 }
+
+@Composable
+fun LineChart(moodData: MoodData) {
+    // Convert mood data to list of pairs for plotting
+    val entries = moodData.moodCounts.entries.toList()
+    val maxValue = entries.maxByOrNull { it.value }?.value ?: 0
+
+    Canvas(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(260.dp)
+            .padding(top = 20.dp, bottom = 16.dp, start = 20.dp, end = 20.dp) // Add padding
+    ) {
+        val graphWidth = size.width - 32 // Adjust width with padding
+        val graphHeight = size.height
+
+        val points = entries.mapIndexed { index, entry ->
+            val x = index * (graphWidth / (entries.size - 1))
+            val y = graphHeight - entry.value.toFloat() / maxValue * graphHeight
+            Offset(x, y)
+        }
+
+        drawLine(
+            color = Color.Black,
+            start = Offset(0f, graphHeight),
+            end = Offset(graphWidth, graphHeight),
+            strokeWidth = 2f
+        )
+
+        drawLine(
+            color = Color.Black,
+            start = Offset(0f, 0f),
+            end = Offset(0f, graphHeight),
+            strokeWidth = 2f
+        )
+
+        points.forEachIndexed { index, point ->
+            if (index < points.size - 1) {
+                drawLine(
+                    color = Color.Black,
+                    start = point,
+                    end = points[index + 1],
+                    strokeWidth = 8f // Increase the thickness of the line
+                )
+            }
+
+            // Draw emojis and counts
+            val emoji = entries[index].key // Get the emoji corresponding to the mood
+            val count = entries[index].value // Get the count of the mood
+
+            // Draw a line from the point to the count at the bottom with bottom padding
+            drawLine(
+                color = Color.Black,
+                start = Offset(point.x, point.y),
+                end = Offset(point.x, graphHeight + 0f), // Add bottom padding of 20f
+                strokeWidth = 2f
+            )
+
+            drawIntoCanvas { canvas ->
+                val paint = android.graphics.Paint().apply { // Specify the Android Paint class
+                    color = Color.Black.toArgb()
+                    textSize = 60f // Adjust the size of the text
+                }
+                // Draw emoji
+                canvas.nativeCanvas.drawText(
+                    emoji,
+                    point.x - 20f, // Adjust the x-coordinate for centering
+                    point.y + 10f, // Adjust the y-coordinate for positioning below the line
+                    paint
+                )
+                // Draw count on the x-axis
+                canvas.nativeCanvas.drawText(
+                    count.toString(),
+                    point.x - 10f, // Adjust the x-coordinate for positioning next to the emoji
+                    size.height - 10f, // Adjust the y-coordinate for positioning above the x-axis
+                    paint
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun BarGraph(moodData: MoodData) {
@@ -175,7 +267,6 @@ fun BarGraph(moodData: MoodData) {
             }
 
         }
-
         entries.forEach { (mood, count) ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
