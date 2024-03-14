@@ -172,14 +172,14 @@ fun LineChart(moodData: MoodData) {
         }
 
         drawLine(
-            color = Color.Black,
+            color = Color.Gray,
             start = Offset(0f, graphHeight),
             end = Offset(graphWidth, graphHeight),
             strokeWidth = 2f
         )
 
         drawLine(
-            color = Color.Black,
+            color = Color.Gray,
             start = Offset(0f, 0f),
             end = Offset(0f, graphHeight),
             strokeWidth = 2f
@@ -201,7 +201,7 @@ fun LineChart(moodData: MoodData) {
 
             // Draw a line from the point to the count at the bottom with bottom padding
             drawLine(
-                color = Color.Black,
+                color = Color.LightGray,
                 start = Offset(point.x, point.y),
                 end = Offset(point.x, graphHeight + 0f), // Add bottom padding of 20f
                 strokeWidth = 2f
@@ -210,7 +210,7 @@ fun LineChart(moodData: MoodData) {
             drawIntoCanvas { canvas ->
                 val paint = android.graphics.Paint().apply { // Specify the Android Paint class
                     color = Color.Black.toArgb()
-                    textSize = 60f // Adjust the size of the text
+                    textSize = 70f // Adjust the size of the text
                 }
                 // Draw emoji
                 canvas.nativeCanvas.drawText(
@@ -219,17 +219,31 @@ fun LineChart(moodData: MoodData) {
                     point.y + 10f, // Adjust the y-coordinate for positioning below the line
                     paint
                 )
-                // Draw count on the x-axis
+
+                // Draw a white box
+                canvas.nativeCanvas.drawRect(
+                    point.x - 30f, // Adjust the x-coordinate for centering
+                    size.height - 70f, // Adjust the y-coordinate for positioning above the x-axis
+                    point.x + 30f, // Adjust the width of the rectangle
+                    size.height - 10f, // Adjust the height of the rectangle
+                    android.graphics.Paint().apply {
+                        color = Color.White.toArgb()
+                    }
+                )
+
+                // Draw count inside the white box
+                paint.color = Color.Black.toArgb()
                 canvas.nativeCanvas.drawText(
                     count.toString(),
-                    point.x - 10f, // Adjust the x-coordinate for positioning next to the emoji
-                    size.height - 10f, // Adjust the y-coordinate for positioning above the x-axis
+                    point.x - 10f, // Adjust the x-coordinate for positioning inside the white box
+                    size.height - 20f, // Adjust the y-coordinate for centering inside the white box
                     paint
                 )
             }
         }
     }
 }
+
 
 
 @Composable

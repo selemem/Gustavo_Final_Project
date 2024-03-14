@@ -1,4 +1,5 @@
 package com.example.gustavo_final_project
+import android.content.Intent
 import android.os.Bundle
 
 import androidx.activity.compose.setContent
@@ -30,19 +31,26 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.gustavo_final_project.User.Companion.registeredUsers
 
 class CreateAccountActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CreateAccountContent()
+            CreateAccountContent(onAccountCreated = { navigateToLoginPage() })
         }
     }
+
+    private fun navigateToLoginPage() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateAccountContent() {
+fun CreateAccountContent(onAccountCreated: () -> Unit) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var dateOfBirth by remember { mutableStateOf("") }
@@ -101,11 +109,16 @@ fun CreateAccountContent() {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(onClick = { /*TODO*/ }) {
+                Button(onClick = {
+                    val newUser = User(firstName, lastName, dateOfBirth, country, email, password)
+                    registeredUsers.add(newUser)
+                    // Optionally, you can navigate to the login page after creating an account
+                    onAccountCreated()
+                }) {
                     Text("Create Account")
                 }
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = { /*TODO*/ }) {
+                Button(onClick = onAccountCreated) {
                     Text("Cancel")
                 }
             }
@@ -116,7 +129,9 @@ fun CreateAccountContent() {
 @Preview
 @Composable
 fun PreviewCreateAccountContent() {
-    val context = LocalContext.current
-    CreateAccountContent()
+    CreateAccountContent(
+        onAccountCreated = {}
+    )
 }
+
 

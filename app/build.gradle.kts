@@ -94,6 +94,7 @@ dependencies {
     implementation ("androidx.compose.runtime:runtime-livedata:1.6.2")
     implementation ("com.google.code.gson:gson:2.9.0")
 
+    implementation ("androidx.compose.material:material:1.6.2")
 
 
 
