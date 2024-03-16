@@ -1,6 +1,8 @@
 package com.example.gustavo_final_project
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -34,24 +36,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gustavo_final_project.User.Companion.registeredUsers
 
-class CreateAccountActivity : AppCompatActivity() {
+class CreateAccountActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val context = applicationContext // Use application context to ensure it's available everywhere
         setContent {
-            CreateAccountContent(onAccountCreated = { navigateToLoginPage() })
+            CreateAccountUI(context) // Pass context to CreateAccountUI
         }
+    }
+
+    @Composable
+    fun CreateAccountUI(context: Context) { // Receive context as parameter
+        CreateAccountContent(
+            context = context,
+            onAccountCreated = {
+                saveRegisteredUsers(context, User.registeredUsers) // Save user data
+                navigateToLoginPage()
+            }
+        )
     }
 
     private fun navigateToLoginPage() {
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
     }
-
 }
+
+//    fun SaveUserData(context: Context, userList: List<User>) {
+//        saveRegisteredUsers(context, userList)
+//    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateAccountContent(onAccountCreated: () -> Unit) {
+fun CreateAccountContent(context: Context, onAccountCreated: () -> Unit) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var dateOfBirth by remember { mutableStateOf("") }
@@ -104,12 +121,14 @@ fun CreateAccountContent(onAccountCreated: () -> Unit) {
                     isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(it).matches()
                     emailErrorMessage = if (!isEmailValid) {
                         "Please enter a valid email address"
+                    } else if (User.registeredUsers.any { user -> user.email == it }) {
+                        "An account with this email already exists"
                     } else {
                         ""
                     }
                 },
                 label = { Text("Email") },
-                isError = !isEmailValid,
+                isError = !isEmailValid || emailErrorMessage.isNotEmpty(),
                 singleLine = true
             )
             if (emailErrorMessage.isNotEmpty()) {
@@ -152,9 +171,10 @@ fun CreateAccountContent(onAccountCreated: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(onClick = {
-                    if (isEmailValid && isPasswordValid) {
+                    if (isEmailValid && isPasswordValid && emailErrorMessage.isEmpty()) {
                         val newUser = User(firstName, lastName, dateOfBirth, country, email, password)
-                        registeredUsers.add(newUser)
+                        User.registeredUsers.add(newUser)
+                        saveRegisteredUsers(context, User.registeredUsers) // Save registered users immediately
                         onAccountCreated()
                     }
                 }) {
@@ -182,14 +202,15 @@ private fun isPasswordValid(password: String): Boolean {
 }
 
 
-
-
 @Preview
 @Composable
 fun PreviewCreateAccountContent() {
+    val context = LocalContext.current // Dummy context for preview
     CreateAccountContent(
+        context = context,
         onAccountCreated = {}
     )
 }
+
 
 

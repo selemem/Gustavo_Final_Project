@@ -36,6 +36,9 @@ import com.example.gustavo_final_project.ui.theme.Gustavo_Final_ProjectTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val context = applicationContext // Use application context to ensure it's available everywhere
+        User.registeredUsers =
+            loadRegisteredUsers(context).toMutableList() // Load registered users when the app starts
         setContent {
             LoginPage(
                 onLoginSuccess = { navigateToHomePage() },
