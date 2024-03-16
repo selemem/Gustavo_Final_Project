@@ -60,9 +60,10 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginPage(onLoginSuccess: () -> Unit, onCreateAccountClicked: () -> Unit) {
+fun LoginPage(onLoginSuccess: (User) -> Unit, onCreateAccountClicked: () -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
 
     Surface(color = Color.White) {
         Column(
@@ -89,15 +90,17 @@ fun LoginPage(onLoginSuccess: () -> Unit, onCreateAccountClicked: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = {
-                val user = registeredUsers.find { it.email == email && it.password == password }
+                val user = findUser(email, password)
                 if (user != null) {
-                    onLoginSuccess()
+                    onLoginSuccess(user)
                 } else {
-                    // Handle login failure (e.g., display error message)
+                    errorMessage = "Invalid email or password"
                 }
             }) {
                 Text("Login")
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(errorMessage, color = Color.Red)
             Spacer(modifier = Modifier.height(16.dp))
             TextButton(onClick = onCreateAccountClicked) {
                 Text("Start a new account here")
@@ -106,11 +109,17 @@ fun LoginPage(onLoginSuccess: () -> Unit, onCreateAccountClicked: () -> Unit) {
     }
 }
 
+fun findUser(email: String, password: String): User? {
+    return User.registeredUsers.find { it.email == email && it.password == password }
+}
+
+
 @Preview
 @Composable
 fun PreviewLoginPage() {
     LoginPage(onLoginSuccess = {}, onCreateAccountClicked = {})
 }
+
 
 
 
