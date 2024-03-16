@@ -1,5 +1,6 @@
 package com.example.gustavo_final_project
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -36,26 +37,48 @@ import com.example.gustavo_final_project.ui.theme.Gustavo_Final_ProjectTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val context = applicationContext // Use application context to ensure it's available everywhere
+        val context = applicationContext
         User.registeredUsers =
-            loadRegisteredUsers(context).toMutableList() // Load registered users when the app starts
-        setContent {
-            LoginPage(
-                onLoginSuccess = { navigateToHomePage() },
-                onCreateAccountClicked = { navigateToCreateAccount() }
-            )
+            loadRegisteredUsers(context).toMutableList()
+        val isLoggedIn = checkLoginStatus(context)
+        if (isLoggedIn) {
+            navigateToHomePage()
+        } else {
+            setContent {
+                LoginPage(
+                    onLoginSuccess = { user ->
+                        saveLoginStatus(context, user.email)
+                        navigateToHomePage()
+                    },
+                    onCreateAccountClicked = { navigateToCreateAccount() }
+                )
+            }
         }
     }
 
     private fun navigateToHomePage() {
         val intent = Intent(this, HomePageActivity::class.java)
         startActivity(intent)
+        finish()
     }
 
     private fun navigateToCreateAccount() {
         val intent = Intent(this, CreateAccountActivity::class.java)
         startActivity(intent)
     }
+
+    private fun checkLoginStatus(context: Context): Boolean {
+        val sharedPreferences = context.getSharedPreferences("login_status", Context.MODE_PRIVATE)
+        return sharedPreferences.contains("email")
+    }
+
+    private fun saveLoginStatus(context: Context, email: String) {
+        val sharedPreferences = context.getSharedPreferences("login_status", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("email", email)
+        editor.apply()
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,7 +135,6 @@ fun LoginPage(onLoginSuccess: (User) -> Unit, onCreateAccountClicked: () -> Unit
 fun findUser(email: String, password: String): User? {
     return User.registeredUsers.find { it.email == email && it.password == password }
 }
-
 
 @Preview
 @Composable

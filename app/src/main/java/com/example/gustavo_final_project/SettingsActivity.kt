@@ -1,5 +1,6 @@
 package com.example.gustavo_final_project
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -63,9 +64,17 @@ class SettingsActivity : ComponentActivity(), MenuItemClickListener {
     }
 
     private fun logOut() {
-        // Implement log out functionality here
+        val context = applicationContext
+        clearLoginStatus(context)
         val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
+    }
+
+    private fun clearLoginStatus(context: Context) {
+        val sharedPreferences = context.getSharedPreferences("login_status", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.clear()
+        editor.apply()
     }
 }
