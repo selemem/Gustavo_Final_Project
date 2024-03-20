@@ -3,6 +3,7 @@ package com.example.gustavo_final_project
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.io.Serializable
 
 data class User(
     val firstName: String,
@@ -11,13 +12,14 @@ data class User(
     val country: String,
     val email: String,
     val password: String
-) {
+) : Serializable {
     companion object {
         var registeredUsers = mutableListOf<User>()
     }
 }
 
-fun saveRegisteredUsers(context: Context, users: List<User>) {
+
+fun saveRegisteredUsers(context: Context, users: List<Any?>) {
     val sharedPreferences = context.getSharedPreferences("registered_users", Context.MODE_PRIVATE)
     val editor = sharedPreferences.edit()
     val gson = Gson()
@@ -33,6 +35,7 @@ fun loadRegisteredUsers(context: Context): List<User> {
     val type = object : TypeToken<List<User>>() {}.type
     return gson.fromJson(json, type) ?: emptyList()
 }
+
 
 //fun printRegisteredUsers() {
 //    println("List of Registered Users:")

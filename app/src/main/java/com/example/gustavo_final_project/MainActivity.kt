@@ -141,9 +141,3 @@ fun findUser(email: String, password: String): User? {
 fun PreviewLoginPage() {
     LoginPage(onLoginSuccess = {}, onCreateAccountClicked = {})
 }
-
-
-
-
-
-

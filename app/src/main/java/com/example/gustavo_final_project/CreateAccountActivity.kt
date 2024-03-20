@@ -34,7 +34,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gustavo_final_project.User.Companion.registeredUsers
 
 class CreateAccountActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -211,6 +210,3 @@ fun PreviewCreateAccountContent() {
         onAccountCreated = {}
     )
 }
-
-
-

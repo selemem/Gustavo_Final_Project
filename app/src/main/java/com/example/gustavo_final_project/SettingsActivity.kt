@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -37,16 +38,16 @@ class SettingsActivity : ComponentActivity(), MenuItemClickListener {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
-            Box(
-            ) {
-                Button(
-                    onClick = { logOut() },
+                Box(
                 ) {
-                    Text("Log Out")
+                    Button(
+                        onClick = { logOut() },
+                    ) {
+                        Text("Log Out")
+                    }
                 }
             }
-        }
-    }}
+        }}
 
     override fun onItemClick(item: String) {
         val intent = when (item) {

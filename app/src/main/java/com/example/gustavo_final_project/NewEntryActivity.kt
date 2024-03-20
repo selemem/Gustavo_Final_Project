@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.text.style.TextAlign
+import com.example.gustavo_final_project.HomePageActivity.Companion.NEW_ENTRY_REQUEST_CODE
 
 @Suppress("DEPRECATION")
 class NewEntryActivity : ComponentActivity() {
@@ -43,7 +44,7 @@ class NewEntryActivity : ComponentActivity() {
         setContent {
             val entry = intent.getParcelableExtra<Entry>("entry") // Retrieve the entry from intent extras
             NewEntryScreen(this@NewEntryActivity, entry) { entryText, currentDate, selectedMood ->
-1
+                1
                 // Pass the mood information back to the caller
                 val intent = Intent().apply {
                     putExtra("entryText", entryText)
@@ -255,4 +256,3 @@ fun NewEntryScreen(
         }
     }
 }
-
