@@ -43,8 +43,8 @@ class NewEntryActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val entry = intent.getParcelableExtra<Entry>("entry") // Retrieve the entry from intent extras
-            NewEntryScreen(this@NewEntryActivity, entry) { entryText, currentDate, selectedMood ->
-                1
+            val isExistingEntry = entry != null // Flag to indicate whether the entry is existing or not
+            NewEntryScreen(this@NewEntryActivity, entry, isExistingEntry) { entryText, currentDate, selectedMood ->
                 // Pass the mood information back to the caller
                 val intent = Intent().apply {
                     putExtra("entryText", entryText)
@@ -63,6 +63,7 @@ class NewEntryActivity : ComponentActivity() {
 fun NewEntryScreen(
     activity: Activity,
     entry: Entry?,
+    isExistingEntry: Boolean,
     onEntryAdded: (String, String, String?) -> Unit // Add a parameter for mood
 ) {
     var textState by remember { mutableStateOf(entry?.text ?: "") } // Set initial text to entry's text if available
@@ -71,7 +72,7 @@ fun NewEntryScreen(
     }
 
     var expanded by remember { mutableStateOf(false) }
-    var selectedMood by remember { mutableStateOf<String?>(null) } // Store the selected mood
+    var selectedMood by remember { mutableStateOf<String?>(entry?.mood) } // Set initial mood to entry's mood
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         // Handle the selected image URI here
@@ -125,27 +126,30 @@ fun NewEntryScreen(
                         fontSize = 16.sp
                     )
                 }
-                TextButton(onClick = {
-                    // Handle "Done" button click
-                    val entryText = textState // Get the text from the text field
-                    val currentDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
+                // Show "Done" button only if it's not an existing entry
+                if (!isExistingEntry) {
+                    TextButton(onClick = {
+                        // Handle "Done" button click
+                        val entryText = textState // Get the text from the text field
+                        val currentDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
 
-                    // Call the callback to add the entry to the map
-                    onEntryAdded(entryText, currentDate, selectedMood) // Pass the selected mood
+                        // Call the callback to add the entry to the map
+                        onEntryAdded(entryText, currentDate, selectedMood) // Pass the selected mood
 
-                    val intent = Intent().apply {
-                        putExtra("entryText", entryText)
-                        putExtra("date", currentDate)
+                        val intent = Intent().apply {
+                            putExtra("entryText", entryText)
+                            putExtra("date", currentDate)
+                        }
+
+                        activity.setResult(Activity.RESULT_OK, intent) // Set the result to be sent back to the HomePageActivity
+                        activity.finish() // Finish the current activity to go back to the HomePageActivity
+                    }) {
+                        Text(
+                            text = "Done",
+                            color = Color.Black,
+                            fontSize = 16.sp
+                        )
                     }
-
-                    activity.setResult(Activity.RESULT_OK, intent) // Set the result to be sent back to the HomePageActivity
-                    activity.finish() // Finish the current activity to go back to the HomePageActivity
-                }) {
-                    Text(
-                        text = "Done",
-                        color = Color.Black,
-                        fontSize = 16.sp
-                    )
                 }
             }
         }
@@ -171,6 +175,7 @@ fun NewEntryScreen(
         TextField(
             value = textState,
             onValueChange = { textState = it },
+            enabled = !isExistingEntry, // Disable editing if it's an existing entry
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
@@ -183,35 +188,38 @@ fun NewEntryScreen(
             contentColor = Color.Black, // Set content color to black
             elevation = 0.dp // Remove drop shadow
         ) {
-            BottomNavigationItem(
-                selected = false,
-                onClick = { launcher.launch("image/*") }, // Launch the image picker
-                icon = {
-                    Icon(Icons.Default.AddAPhoto, contentDescription = "Add Pictures")
-                },
-            )
-            BottomNavigationItem(
-                selected = false,
-                onClick = { expanded = true },
-                icon = {
-                    Icon(Icons.Default.AddReaction, contentDescription = "Mood")
-                },
-            )
-            BottomNavigationItem(
-                selected = false,
-                onClick = {
-                    // Start the Speech to Text recognition
-                    val speechIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
-                    speechIntent.putExtra(
-                        RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-                    )
-                    speechLauncher.launch(speechIntent)
-                },
-                icon = {
-                    Icon(Icons.Default.Mic, contentDescription = "Voice")
-                },
-            )
+            // Show bottom menu only if it's not an existing entry
+            if (!isExistingEntry) {
+                BottomNavigationItem(
+                    selected = false,
+                    onClick = { launcher.launch("image/*") }, // Launch the image picker
+                    icon = {
+                        Icon(Icons.Default.AddAPhoto, contentDescription = "Add Pictures")
+                    },
+                )
+                BottomNavigationItem(
+                    selected = false,
+                    onClick = { expanded = true },
+                    icon = {
+                        Icon(Icons.Default.AddReaction, contentDescription = "Mood")
+                    },
+                )
+                BottomNavigationItem(
+                    selected = false,
+                    onClick = {
+                        // Start the Speech to Text recognition
+                        val speechIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+                        speechIntent.putExtra(
+                            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                        )
+                        speechLauncher.launch(speechIntent)
+                    },
+                    icon = {
+                        Icon(Icons.Default.Mic, contentDescription = "Voice")
+                    },
+                )
+            }
         }
         // Dropdown menu for mood selection
         Box(

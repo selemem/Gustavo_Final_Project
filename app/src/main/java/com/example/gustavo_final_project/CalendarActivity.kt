@@ -62,17 +62,11 @@ class CalendarActivity : ComponentActivity(), MenuItemClickListener {
                         .fillMaxSize()
                         .padding(top = 60.dp, start = 0.dp, end = 0.dp, bottom = 0.dp),
                     entries = entries,
-                    onDateSelected = { selectedDate ->
-                        val selectedDateString = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date(selectedDate))
-                        val selectedEntries = entries.filter { it.date == selectedDateString }
-
-                        // Now you can do something with the selected entries, such as displaying them or performing any other operation
-                        // For example, you might want to update the UI to display the selected entries
-                        // You can store the selected entries in a state variable and use it to update the UI
-                        // For simplicity, I'll just print the entries to the log
-                        selectedEntries.forEach { entry ->
-                            Log.d("SelectedEntries", "Entry: ${entry.text}, Date: ${entry.date}")
-                        }
+                    onItemClick = { selectedEntry ->
+                        // Launch NewEntryActivity with the selected entry
+                        val intent = Intent(this@CalendarActivity, NewEntryActivity::class.java)
+                        intent.putExtra("entry", selectedEntry)
+                        startActivity(intent)
                     }
                 )
             }
@@ -98,12 +92,11 @@ class CalendarActivity : ComponentActivity(), MenuItemClickListener {
     }
 }
 
-
 @Composable
 fun CalendarView(
     modifier: Modifier = Modifier,
     entries: List<Entry>,
-    onDateSelected: (Long) -> Unit
+    onItemClick: (Entry) -> Unit
 ) {
     val selectedDateInMillis = remember { mutableStateOf(0L) }
     val selectedEntries = remember { mutableStateOf<List<Entry>?>(null) }
@@ -137,7 +130,6 @@ fun CalendarView(
                                 val entryDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date(selectedDate))
                                 entry.date == entryDate
                             }
-                            onDateSelected(selectedDate)
                         }
                     }
                 }
@@ -177,7 +169,7 @@ fun CalendarView(
                 modifier = Modifier.weight(1f) // Take remaining available space
             ) {
                 items(selectedEntries.value!!) { entry ->
-                    EntryCard(entry = entry, onItemClick = {})
+                    EntryCard(entry = entry, onItemClick = onItemClick)
                     Spacer(modifier = Modifier.height(16.dp)) // Add space between EntryCards
                 }
             }
