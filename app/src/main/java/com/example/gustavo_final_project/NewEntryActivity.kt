@@ -1,18 +1,22 @@
 package com.example.gustavo_final_project
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
@@ -33,9 +37,18 @@ import androidx.compose.material.icons.extended.*
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.window.Popup
 import com.example.gustavo_final_project.HomePageActivity.Companion.NEW_ENTRY_REQUEST_CODE
+import com.google.android.material.bottomsheet.BottomSheetDialog
 
 @Suppress("DEPRECATION")
 class NewEntryActivity : ComponentActivity() {
@@ -43,8 +56,8 @@ class NewEntryActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val entry = intent.getParcelableExtra<Entry>("entry") // Retrieve the entry from intent extras
-            val isExistingEntry = entry != null // Flag to indicate whether the entry is existing or not
-            NewEntryScreen(this@NewEntryActivity, entry, isExistingEntry) { entryText, currentDate, selectedMood ->
+            NewEntryScreen(this@NewEntryActivity, entry) { entryText, currentDate, selectedMood ->
+                1
                 // Pass the mood information back to the caller
                 val intent = Intent().apply {
                     putExtra("entryText", entryText)
@@ -63,7 +76,6 @@ class NewEntryActivity : ComponentActivity() {
 fun NewEntryScreen(
     activity: Activity,
     entry: Entry?,
-    isExistingEntry: Boolean,
     onEntryAdded: (String, String, String?) -> Unit // Add a parameter for mood
 ) {
     var textState by remember { mutableStateOf(entry?.text ?: "") } // Set initial text to entry's text if available
@@ -71,8 +83,9 @@ fun NewEntryScreen(
         SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
     }
 
-    var expanded by remember { mutableStateOf(false) }
-    var selectedMood by remember { mutableStateOf<String?>(entry?.mood) } // Set initial mood to entry's mood
+    var shareMenuExpanded by remember { mutableStateOf(false) }
+    var moodMenuExpanded by remember { mutableStateOf(false) }
+    var selectedMood by remember { mutableStateOf<String?>(null) } // Store the selected mood
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         // Handle the selected image URI here
@@ -119,6 +132,12 @@ fun NewEntryScreen(
                 fontWeight = FontWeight.Bold
             )
             Row {
+                // Share button with dropdown menu
+                TextButton(onClick = { shareMenuExpanded = !shareMenuExpanded }) {
+                    Text("Share",
+                        color = Color.Black,
+                        fontSize = 16.sp)
+                }
                 TextButton(onClick = { activity.finish() }) {
                     Text(
                         text = "Cancel",
@@ -126,23 +145,19 @@ fun NewEntryScreen(
                         fontSize = 16.sp
                     )
                 }
-                // Show "Done" button only if it's not an existing entry
-                if (!isExistingEntry) {
+                if (entry == null) { // Render "Done" button only for new entries
                     TextButton(onClick = {
-                        // Handle "Done" button click
-                        val entryText = textState // Get the text from the text field
+                        val entryText = textState
                         val currentDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
-
-                        // Call the callback to add the entry to the map
-                        onEntryAdded(entryText, currentDate, selectedMood) // Pass the selected mood
+                        onEntryAdded(entryText, currentDate, selectedMood)
 
                         val intent = Intent().apply {
                             putExtra("entryText", entryText)
                             putExtra("date", currentDate)
                         }
 
-                        activity.setResult(Activity.RESULT_OK, intent) // Set the result to be sent back to the HomePageActivity
-                        activity.finish() // Finish the current activity to go back to the HomePageActivity
+                        activity.setResult(Activity.RESULT_OK, intent)
+                        activity.finish()
                     }) {
                         Text(
                             text = "Done",
@@ -175,7 +190,6 @@ fun NewEntryScreen(
         TextField(
             value = textState,
             onValueChange = { textState = it },
-            enabled = !isExistingEntry, // Disable editing if it's an existing entry
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
@@ -183,13 +197,12 @@ fun NewEntryScreen(
         )
 
         // Bottom menu with options
-        BottomNavigation(
-            backgroundColor = Color.White, // Set background color to white
-            contentColor = Color.Black, // Set content color to black
-            elevation = 0.dp // Remove drop shadow
-        ) {
-            // Show bottom menu only if it's not an existing entry
-            if (!isExistingEntry) {
+        if (entry == null) { // Render bottom menu only for new entries
+            BottomNavigation(
+                backgroundColor = Color.White, // Set background color to white
+                contentColor = Color.Black, // Set content color to black
+                elevation = 0.dp // Remove drop shadow
+            ) {
                 BottomNavigationItem(
                     selected = false,
                     onClick = { launcher.launch("image/*") }, // Launch the image picker
@@ -199,7 +212,7 @@ fun NewEntryScreen(
                 )
                 BottomNavigationItem(
                     selected = false,
-                    onClick = { expanded = true },
+                    onClick = { moodMenuExpanded = true },
                     icon = {
                         Icon(Icons.Default.AddReaction, contentDescription = "Mood")
                     },
@@ -222,45 +235,139 @@ fun NewEntryScreen(
             }
         }
         // Dropdown menu for mood selection
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.width(IntrinsicSize.Min)
+        if (entry == null && moodMenuExpanded) { // Render mood dropdown only for new entries when expanded
+            Popup(
+                // alignment = Alignment.TopCenter, // Align to the top center
+                offset = IntOffset(50, 1600), // Offset upward by 50 pixels
             ) {
-                Text(
-                    text = "How are you feeling today?",
-                    fontSize = 20.sp,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Row(
-                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                Card(
+                    modifier = Modifier.padding(16.dp), // Add padding to the Card
+                    elevation = 8.dp
                 ) {
-                    moods.forEach { (emoji, mood) ->
-                        IconButton(
-                            onClick = {
-                                selectedMood = mood // Set the selected mood
-                                expanded = false
-                            }
+                    Column(
+                        modifier = Modifier.padding(vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "How are you feeling today?",
+                            fontSize = 20.sp,
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                        Row(
+                            modifier = Modifier.horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Text(
-                                text = emoji,
-                                fontSize = 36.sp,
-                                modifier = Modifier.size(72.dp),
-                                textAlign = TextAlign.Center,
-                                color = Color.Black
-                            )
+                            moods.forEach { (emoji, mood) ->
+                                IconButton(
+                                    onClick = {
+                                        selectedMood = mood // Set the selected mood
+                                        moodMenuExpanded = false
+                                    }
+                                ) {
+                                    Text(
+                                        text = emoji,
+                                        fontSize = 36.sp,
+                                        modifier = Modifier.size(72.dp),
+                                        textAlign = TextAlign.Center,
+                                        color = Color.Black
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+        // Dropdown menu for sharing options
+        if (shareMenuExpanded) { // Render share dropdown only when expanded
+            ShareOptionsDropdown(
+                activity = activity,
+                text = textState,
+                expanded = shareMenuExpanded,
+                onDismissRequest = { shareMenuExpanded = false }
+            )
+        }
+    }
+}
+
+@Composable
+fun ShareOptionsDropdown(
+    activity: Activity,
+    text: String,
+    expanded: Boolean,
+    onDismissRequest: () -> Unit
+) {
+    val shareOptions = listOf("Facebook", "Twitter", "WhatsApp")
+    Popup(
+        alignment = Alignment.TopStart,
+        offset = IntOffset(450, 70),
+        onDismissRequest = onDismissRequest
+    ) {
+        Card(
+            modifier = Modifier.padding(16.dp),
+            elevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier.width(IntrinsicSize.Max)
+            ) {
+                shareOptions.forEach { option ->
+                    DropdownMenuItem(
+                        onClick = {
+                            onDismissRequest() // Dismiss the dropdown menu
+                            handleShareOption(activity, option, text)
+                        }
+                    ) {
+                        Text(text = option)
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun handleShareOption(activity: Activity, option: String, text: String) {
+    when (option) {
+        "Facebook" -> shareOnFacebook(activity, text)
+        "Twitter" -> shareOnTwitter(activity, text)
+        "WhatsApp" -> shareOnWhatsApp(activity, text)
+    }
+}
+
+fun shareOnFacebook(activity: Activity, text: String) {
+    val shareIntent = Intent(Intent.ACTION_SEND)
+    shareIntent.type = "text/plain"
+    shareIntent.putExtra(Intent.EXTRA_TEXT, text)
+    shareIntent.`package` = "com.facebook.katana" // Package name for Facebook
+    try {
+        activity.startActivity(shareIntent)
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(activity, "Facebook app not installed.", Toast.LENGTH_SHORT).show()
+    }
+}
+
+fun shareOnTwitter(activity: Activity, text: String) {
+    val shareIntent = Intent(Intent.ACTION_SEND)
+    shareIntent.type = "text/plain"
+    shareIntent.putExtra(Intent.EXTRA_TEXT, text)
+    shareIntent.`package` = "com.twitter.android" // Package name for Twitter
+    try {
+        activity.startActivity(shareIntent)
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(activity, "Twitter app not installed.", Toast.LENGTH_SHORT).show()
+    }
+}
+
+fun shareOnWhatsApp(activity: Activity, text: String) {
+    val shareIntent = Intent(Intent.ACTION_SEND)
+    shareIntent.type = "text/plain"
+    shareIntent.putExtra(Intent.EXTRA_TEXT, text)
+    shareIntent.`package` = "com.whatsapp" // Package name for WhatsApp
+    try {
+        activity.startActivity(shareIntent)
+    } catch (e: ActivityNotFoundException) {
+        Toast.makeText(activity, "WhatsApp app not installed.", Toast.LENGTH_SHORT).show()
     }
 }
