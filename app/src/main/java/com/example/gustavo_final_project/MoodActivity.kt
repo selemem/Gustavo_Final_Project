@@ -120,15 +120,15 @@ class MoodActivity : ComponentActivity(), MenuItemClickListener {
         return gson.fromJson(json, type) ?: emptyList()
     }
 }
-
-
 @Composable
 fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
     val moodData = collectMoodData(entries)
 
     if (!showMenu) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 50.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -140,15 +140,99 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
                 )
             } else {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    BarGraph(moodData)
-                    Divider(modifier = Modifier.padding(top = 0.dp, bottom = 16.dp, start = 16.dp, end = 16.dp)) // Add a divider
-                    LineChart(moodData)
+                    val totalCount = entries.size // Calculate the total count of entries
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                            .padding(16.dp)
+                    ) {
+                        TotalReactionsBox(totalCount)
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                            .padding(16.dp)
+                    ) {
+                        BarGraph(moodData)
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                            .padding(16.dp)
+                    ) {
+                        LineChart(moodData)
+                    }
                 }
             }
         }
     } else {
         // Display an empty composable when the menu is open to hide other content
         Box(modifier = Modifier.fillMaxSize())
+    }
+}
+
+@Composable
+fun TotalReactionsBox(totalCount: Int) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = "Total reactions: ",
+                fontSize = 24.sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "$totalCount",
+                fontSize = 20.sp,
+                color = Color.Black
+            )
+        }
+    }
+
+
+@Composable
+fun BarGraph(moodData: MoodData) {
+    val entries = moodData.moodCounts.entries.toList()
+    val totalCount = entries.sumBy { it.value } // Calculate the total count of moods
+    val maxValue = entries.maxByOrNull { it.value }?.value ?: 0
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        entries.forEach { (mood, count) ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 12.dp) // Add more space between bars
+            ) {
+                // Place the emoji in front of the bar
+                Text(
+                    text = mood,
+                    modifier = Modifier.padding(end = 8.dp),
+                    fontSize = 24.sp
+                )
+                // Create a thicker bar with rounded corners
+                LinearProgressIndicator(
+                    progress = count.toFloat() / maxValue,
+                    modifier = Modifier
+                        .weight(1f) // Ensure the bar takes the remaining space
+                        .height(18.dp) // Adjust the height as needed for thicker bars
+                        .clip(RoundedCornerShape(8.dp)) // Round the corners
+                )
+                // Display the count of occurrences
+                Text(
+                    text = count.toString(),
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(start = 8.dp) // Add padding between the bar and the count
+                )
+            }
+        }
     }
 }
 
@@ -162,7 +246,7 @@ fun LineChart(moodData: MoodData) {
         modifier = Modifier
             .fillMaxWidth()
             .height(260.dp)
-            .padding(top = 20.dp, bottom = 16.dp, start = 20.dp, end = 20.dp) // Add padding
+            .padding(top = 20.dp, bottom = 60.dp, start = 20.dp, end = 20.dp) // Add padding
     ) {
         val graphWidth = size.width - 32 // Adjust width with padding
         val graphHeight = size.height
@@ -205,7 +289,7 @@ fun LineChart(moodData: MoodData) {
             drawLine(
                 color = Color.Black,
                 start = Offset(point.x, point.y),
-                end = Offset(point.x, graphHeight + 0f), // Add bottom padding of 20f
+                end = Offset(point.x, graphHeight + 20f), // Add bottom padding of 20f
                 strokeWidth = 2f
             )
 
@@ -214,85 +298,19 @@ fun LineChart(moodData: MoodData) {
                     color = Color.Black.toArgb()
                     textSize = 60f // Adjust the size of the text
                 }
-                // Draw emoji
+                // Draw emoji above the count
                 canvas.nativeCanvas.drawText(
                     emoji,
                     point.x - 20f, // Adjust the x-coordinate for centering
-                    point.y + 10f, // Adjust the y-coordinate for positioning below the line
+                    point.y - 10f, // Adjust the y-coordinate for positioning above the line
                     paint
                 )
-                // Draw count on the x-axis
+                // Draw count underneath the line
                 canvas.nativeCanvas.drawText(
                     count.toString(),
-                    point.x - 10f, // Adjust the x-coordinate for positioning next to the emoji
-                    size.height - 10f, // Adjust the y-coordinate for positioning above the x-axis
+                    point.x - 10f, // Adjust the x-coordinate for centering
+                    graphHeight + 40f, // Adjust the y-coordinate for positioning below the line
                     paint
-                )
-            }
-        }
-    }
-}
-
-
-@Composable
-fun BarGraph(moodData: MoodData) {
-    val entries = moodData.moodCounts.entries.toList()
-    val totalCount = entries.sumBy { it.value } // Calculate the total count of moods
-    val maxValue = entries.maxByOrNull { it.value }?.value ?: 0
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        // Display the total count of moods in a gray-bordered box at the top
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Row (verticalAlignment = Alignment.CenterVertically){
-                Text(
-                    text = "Total reactions: ",
-                    fontSize = 24.sp,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "$totalCount",
-                    fontSize = 20.sp,
-                    color = Color.Black
-                )
-            }
-
-        }
-        entries.forEach { (mood, count) ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 12.dp) // Add more space between bars
-            ) {
-                // Place the emoji in front of the bar
-                Text(
-                    text = mood,
-                    modifier = Modifier.padding(end = 8.dp),
-                    fontSize = 24.sp
-                )
-                // Create a thicker bar with rounded corners
-                LinearProgressIndicator(
-                    progress = count.toFloat() / maxValue,
-                    modifier = Modifier
-                        .weight(1f) // Ensure the bar takes the remaining space
-                        .height(18.dp) // Adjust the height as needed for thicker bars
-                        .clip(RoundedCornerShape(8.dp)) // Round the corners
-                )
-                // Display the count of occurrences
-                Text(
-                    text = count.toString(),
-                    fontSize = 18.sp,
-                    modifier = Modifier.padding(start = 8.dp) // Add padding between the bar and the count
                 )
             }
         }

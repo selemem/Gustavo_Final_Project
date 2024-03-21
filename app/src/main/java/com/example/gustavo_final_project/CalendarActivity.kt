@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.CalendarView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -104,75 +108,103 @@ fun CalendarView(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(top = 10.dp)
     ) {
+        // CalendarBox
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .padding(horizontal = 16.dp)
+                .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
         ) {
-            AndroidView(
-                modifier = Modifier.matchParentSize(),
-                factory = { context ->
-                    CalendarView(context).apply {
-                        // Adjust the layout parameters to increase the size of the calendar
-                        layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            800 // Adjust the height as needed
-                        )
+            CalendarBox(entries = entries) { dateInMillis, filteredEntries ->
+                selectedDateInMillis.value = dateInMillis
+                selectedEntries.value = filteredEntries
+            }
+        }
 
-                        setOnDateChangeListener { _, year, month, dayOfMonth ->
-                            val calendar = Calendar.getInstance()
-                            calendar.set(year, month, dayOfMonth)
-                            val selectedDate = calendar.timeInMillis
-                            selectedDateInMillis.value = selectedDate
-                            selectedEntries.value = entries.filter { entry ->
-                                val entryDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date(selectedDate))
-                                entry.date == entryDate
-                            }
-                        }
+        // DisplayEntries
+        selectedEntries.value?.let { entries ->
+            DisplayEntries(entries, onItemClick)
+        }
+    }
+}
+
+@Composable
+fun CalendarBox(entries: List<Entry>, onDateSelected: (Long, List<Entry>) -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        AndroidView(
+            //modifier = Modifier.matchParentSize(),
+            factory = { context ->
+                CalendarView(context).apply {
+                    // Adjust the layout parameters to increase the size of the calendar
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        1000 // Adjust the height as needed
+                    )
+
+                    setOnDateChangeListener { _, year, month, dayOfMonth ->
+                        val calendar = Calendar.getInstance()
+                        calendar.set(year, month, dayOfMonth)
+                        val selectedDate = calendar.timeInMillis
+                        val filteredEntries = filterEntriesForDate(selectedDate, entries)
+                        onDateSelected(selectedDate, filteredEntries)
                     }
                 }
-            )
+            }
+        )
+    }
+}
 
-            // Show the message only when no entries are found for the selected date
-            if (selectedEntries.value != null && selectedEntries.value!!.isEmpty() && selectedDateInMillis.value != 0L) {
+
+fun filterEntriesForDate(selectedDate: Long, entries: List<Entry>): List<Entry> {
+    val formattedSelectedDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date(selectedDate))
+    return entries.filter { entry ->
+        entry.date == formattedSelectedDate
+    }
+}
+
+@Composable
+fun DisplayEntries(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
+    if (entries.isNotEmpty()) {
+        Text(
+            text = "Entries on this day:",
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            fontSize = 20.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 32.dp, bottom = 16.dp) // Added more space between title and entries
+        )
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            items(entries) { entry ->
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    Text(
-                        text = "No entries added to this day",
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        fontSize = 20.sp,
-                        modifier = Modifier
-                            .padding(top = 280.dp, bottom = 16.dp)
+                    EntryCard(
+                        entry = entry,
+                        onItemClick = onItemClick
                     )
                 }
+                Spacer(modifier = Modifier.height(16.dp)) // Add space between EntryCards
             }
         }
-
-        // Display entries when they are available
-        if (selectedEntries.value != null && selectedEntries.value!!.isNotEmpty()) {
-            Text(
-                text = "Entries on this day:",
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                fontSize = 20.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 16.dp)
-            )
-            LazyColumn(
-                modifier = Modifier.weight(1f) // Take remaining available space
-            ) {
-                items(selectedEntries.value!!) { entry ->
-                    EntryCard(entry = entry, onItemClick = onItemClick)
-                    Spacer(modifier = Modifier.height(16.dp)) // Add space between EntryCards
-                }
-            }
-        }
+    } else {
+        // Show message when no entries are available
+        Text(
+            text = "No entries added to this day",
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            fontSize = 20.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
+        )
     }
 }

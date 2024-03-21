@@ -3,6 +3,7 @@ package com.example.gustavo_final_project
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.widget.Toast
@@ -10,10 +11,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -39,6 +43,8 @@ import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -47,6 +53,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.Popup
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
 import com.example.gustavo_final_project.HomePageActivity.Companion.NEW_ENTRY_REQUEST_CODE
 import com.google.android.material.bottomsheet.BottomSheetDialog
 
@@ -56,13 +64,13 @@ class NewEntryActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val entry = intent.getParcelableExtra<Entry>("entry") // Retrieve the entry from intent extras
-            NewEntryScreen(this@NewEntryActivity, entry) { entryText, currentDate, selectedMood ->
-                1
+            NewEntryScreen(this@NewEntryActivity, entry) { entryText, currentDate, selectedMood, selectedImages ->
                 // Pass the mood information back to the caller
                 val intent = Intent().apply {
                     putExtra("entryText", entryText)
                     putExtra("date", currentDate)
                     putExtra("mood", selectedMood) // Pass the selected mood
+                    putParcelableArrayListExtra("images", ArrayList(selectedImages)) // Pass the selected images
                 }
                 setResult(Activity.RESULT_OK, intent)
                 finish()
@@ -71,12 +79,12 @@ class NewEntryActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
 @Composable
 fun NewEntryScreen(
     activity: Activity,
     entry: Entry?,
-    onEntryAdded: (String, String, String?) -> Unit // Add a parameter for mood
+    onEntryAdded: (String, String, String?, List<Uri>) -> Unit // Add a parameter for mood and images
 ) {
     var textState by remember { mutableStateOf(entry?.text ?: "") } // Set initial text to entry's text if available
     val currentDate = remember {
@@ -87,12 +95,12 @@ fun NewEntryScreen(
     var moodMenuExpanded by remember { mutableStateOf(false) }
     var selectedMood by remember { mutableStateOf<String?>(null) } // Store the selected mood
 
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        // Handle the selected image URI here
-        // You can use the URI to load the image into the text box or perform other operations
-        if (uri != null) {
-            // Handle the selected image URI
-            // For example, you might want to display the image in an ImageView or add it to the text box
+    var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) } // Store the selected image URIs
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            // Handle the selected image URI here
+            selectedImages = selectedImages + it
         }
     }
 
@@ -149,7 +157,7 @@ fun NewEntryScreen(
                     TextButton(onClick = {
                         val entryText = textState
                         val currentDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
-                        onEntryAdded(entryText, currentDate, selectedMood)
+                        onEntryAdded(entryText, currentDate, selectedMood, selectedImages)
 
                         val intent = Intent().apply {
                             putExtra("entryText", entryText)
@@ -191,12 +199,36 @@ fun NewEntryScreen(
             value = textState,
             onValueChange = { textState = it },
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
+                .fillMaxSize()
+                .weight(1f), // Take up the entire available space
             placeholder = { Text(text = "Write your thoughts here...") }
         )
 
-        // Bottom menu with options
+        //Spacer(modifier = Modifier.height(8.dp)) // Add space between the text field and the pictures
+
+        // Selected images preview
+        if (selectedImages.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f) // Take half of the available space
+            ) {
+                items(selectedImages) { uri ->
+                    Image(
+                        painter = rememberImagePainter(uri),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth() // Clip the image to fill the entire width of the screen
+                            .height(400.dp) // Set a fixed height for the image
+                            .clip(shape = RoundedCornerShape(8.dp)) // Apply rounded corners to the image
+                            .padding(bottom = 16.dp), // Add space between each picture
+                        contentScale = ContentScale.Crop // Crop the image to fit the specified dimensions
+                    )
+                }
+            }
+        }
+
+    // Bottom menu with options
         if (entry == null) { // Render bottom menu only for new entries
             BottomNavigation(
                 backgroundColor = Color.White, // Set background color to white
@@ -236,9 +268,12 @@ fun NewEntryScreen(
         }
         // Dropdown menu for mood selection
         if (entry == null && moodMenuExpanded) { // Render mood dropdown only for new entries when expanded
+            // Popup to close when clicking outside
+            val onDismissRequest = { moodMenuExpanded = false }
             Popup(
                 // alignment = Alignment.TopCenter, // Align to the top center
                 offset = IntOffset(50, 1600), // Offset upward by 50 pixels
+                onDismissRequest = onDismissRequest
             ) {
                 Card(
                     modifier = Modifier.padding(16.dp), // Add padding to the Card
@@ -301,6 +336,7 @@ fun ShareOptionsDropdown(
     onDismissRequest: () -> Unit
 ) {
     val shareOptions = listOf("Facebook", "Twitter", "WhatsApp")
+    // Popup to close when clicking outside
     Popup(
         alignment = Alignment.TopStart,
         offset = IntOffset(450, 70),
