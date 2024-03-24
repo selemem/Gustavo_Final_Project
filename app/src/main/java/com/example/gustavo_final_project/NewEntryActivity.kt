@@ -197,7 +197,7 @@ fun NewEntryScreen(
             placeholder = { Text(text = "Write your thoughts here...") },
             enabled = isEditingEnabled // Disable editing if an entry already exists
         )
-        
+
         // Selected images preview
         if (selectedImages.isNotEmpty()) {
             LazyColumn(
