@@ -13,14 +13,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Icon
@@ -41,22 +39,14 @@ import androidx.compose.material.icons.extended.*
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.window.Popup
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import com.example.gustavo_final_project.HomePageActivity.Companion.NEW_ENTRY_REQUEST_CODE
-import com.google.android.material.bottomsheet.BottomSheetDialog
 
 @Suppress("DEPRECATION")
 class NewEntryActivity : ComponentActivity() {
@@ -194,6 +184,9 @@ fun NewEntryScreen(
             }
         }
 
+        // Add a flag to determine if text editing is enabled
+        val isEditingEnabled = entry == null // Disable editing if an entry already exists
+
         // TextField for entering thoughts
         TextField(
             value = textState,
@@ -201,11 +194,10 @@ fun NewEntryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f), // Take up the entire available space
-            placeholder = { Text(text = "Write your thoughts here...") }
+            placeholder = { Text(text = "Write your thoughts here...") },
+            enabled = isEditingEnabled // Disable editing if an entry already exists
         )
-
-        //Spacer(modifier = Modifier.height(8.dp)) // Add space between the text field and the pictures
-
+        
         // Selected images preview
         if (selectedImages.isNotEmpty()) {
             LazyColumn(
@@ -228,7 +220,7 @@ fun NewEntryScreen(
             }
         }
 
-    // Bottom menu with options
+        // Bottom menu with options
         if (entry == null) { // Render bottom menu only for new entries
             BottomNavigation(
                 backgroundColor = Color.White, // Set background color to white
