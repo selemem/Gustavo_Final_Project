@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -16,6 +17,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,8 +56,10 @@ class NewEntryActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val entry = intent.getParcelableExtra<Entry>("entry")
+
             // Retrieve picture URIs from intent extras
-            val pictureUris = intent.getStringArrayExtra("pictureUris")?.map { Uri.parse(it) }
+            val pictureUris = intent.getParcelableArrayListExtra<Uri>("pictureUris")
+            Log.d("NewEntryActivity", "Picture URIs: $pictureUris")
 
             NewEntryScreen(this@NewEntryActivity, entry, pictureUris) { entryText, currentDate, selectedMood, selectedImages ->
                 val intent = Intent().apply {
@@ -88,12 +92,13 @@ fun NewEntryScreen(
     var shareMenuExpanded by remember { mutableStateOf(false) }
     var moodMenuExpanded by remember { mutableStateOf(false) }
     var selectedMood by remember { mutableStateOf<String?>(null) } // Store the selected mood
-    var selectedImages by remember { mutableStateOf<List<Uri>>(pictureUris ?: emptyList()) }
+    var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
+
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             // Handle the selected image URI here
-            selectedImages = selectedImages + it
+            selectedImages = selectedImages + it // <- Ensure this line is correctly adding the URI to selectedImages
         }
     }
 
@@ -206,6 +211,14 @@ fun NewEntryScreen(
             placeholder = { Text(text = "Write your thoughts here...") },
             enabled = isEditingEnabled // Disable editing if an entry already exists
         )
+
+        // Populate selectedImages with picture URIs from the Entry object
+        if (entry != null && pictureUris.isNullOrEmpty()) {
+            selectedImages = entry.pictureUris // Use the picture URIs from the Entry object
+        }
+
+        // Log the picture URIs to check if they are valid
+        Log.d("PictureURIs", "Picture URIs: $selectedImages")
 
         // Selected images preview
         selectedImages.takeIf { it.isNotEmpty() || entry?.pictureUris?.isNotEmpty() == true }?.let { images ->

@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -50,6 +51,11 @@ data class Entry(
             parcel.readList(this, Uri::class.java.classLoader)
         }
     )
+
+    // Convert picture URIs to URI objects for display
+    fun getPicturesUris(): List<Uri> {
+        return pictureUris // Already a list of Uri objects
+    }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(text)
@@ -103,6 +109,18 @@ fun EntryCard(entry: Entry, onItemClick: (Entry) -> Unit) {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
+
+            // Display images associated with the entry
+            entry.pictureUris.forEach { uri ->
+                Image(
+                    painter = rememberImagePainter(uri),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(100.dp) // Adjust size as needed
+                        .padding(4.dp), // Add padding between images
+                    contentScale = ContentScale.Crop // Crop the image to fit the specified dimensions
+                )
+            }
         }
     }
 }

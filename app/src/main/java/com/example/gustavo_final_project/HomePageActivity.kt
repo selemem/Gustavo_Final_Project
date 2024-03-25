@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -78,11 +79,15 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
             startActivity(intent)
         }
     }
+
     private fun onEntryClick(entry: Entry) {
+        // Log picture URIs before passing to NewEntryActivity
+        Log.d("EntryClick", "Picture URIs: ${entry.pictureUris}")
+
         val intent = Intent(this, NewEntryActivity::class.java)
         intent.putExtra("entry", entry)
-        // Pass picture URIs to NewEntryActivity
-        intent.putExtra("pictureUris", entry.pictureUris.toTypedArray())
+        // Pass picture URIs to NewEntryActivity as ParcelableArrayList<Uri>
+        intent.putParcelableArrayListExtra("pictureUris", ArrayList(entry.pictureUris))
         startActivity(intent)
     }
 
