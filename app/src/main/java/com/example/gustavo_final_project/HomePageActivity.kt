@@ -78,10 +78,11 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
             startActivity(intent)
         }
     }
-
     private fun onEntryClick(entry: Entry) {
         val intent = Intent(this, NewEntryActivity::class.java)
         intent.putExtra("entry", entry)
+        // Pass picture URIs to NewEntryActivity
+        intent.putExtra("pictureUris", entry.pictureUris.toTypedArray())
         startActivity(intent)
     }
 

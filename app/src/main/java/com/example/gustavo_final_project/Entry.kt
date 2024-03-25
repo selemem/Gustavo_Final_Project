@@ -39,18 +39,23 @@ import java.io.Serializable
 data class Entry(
     val text: String,
     val date: String,
-    val mood: String? = null // Nullable mood field
+    val mood: String? = null,
+    val pictureUris: List<Uri> = emptyList()
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
         parcel.readString() ?: "",
-        parcel.readString()
+        parcel.readString(),
+        mutableListOf<Uri>().apply {
+            parcel.readList(this, Uri::class.java.classLoader)
+        }
     )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(text)
         parcel.writeString(date)
         parcel.writeString(mood)
+        parcel.writeList(pictureUris)
     }
 
     override fun describeContents(): Int {

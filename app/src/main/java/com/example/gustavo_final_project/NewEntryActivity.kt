@@ -53,13 +53,15 @@ class NewEntryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val entry = intent.getParcelableExtra<Entry>("entry") // Retrieve the entry from intent extras
-            NewEntryScreen(this@NewEntryActivity, entry) { entryText, currentDate, selectedMood, selectedImages ->
-                // Pass the mood information back to the caller
+            val entry = intent.getParcelableExtra<Entry>("entry")
+            // Retrieve picture URIs from intent extras
+            val pictureUris = intent.getStringArrayExtra("pictureUris")?.map { Uri.parse(it) }
+
+            NewEntryScreen(this@NewEntryActivity, entry, pictureUris) { entryText, currentDate, selectedMood, selectedImages ->
                 val intent = Intent().apply {
                     putExtra("entryText", entryText)
                     putExtra("date", currentDate)
-                    putExtra("mood", selectedMood) // Pass the selected mood
+                    putExtra("mood", selectedMood)
                     putParcelableArrayListExtra("images", ArrayList(selectedImages)) // Pass the selected images
                 }
                 setResult(Activity.RESULT_OK, intent)
@@ -69,12 +71,14 @@ class NewEntryActivity : ComponentActivity() {
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalCoilApi::class)
 @Composable
 fun NewEntryScreen(
     activity: Activity,
     entry: Entry?,
-    onEntryAdded: (String, String, String?, List<Uri>) -> Unit // Add a parameter for mood and images
+    pictureUris: List<Uri>?, // Accept picture URIs as parameter
+    onEntryAdded: (String, String, String?, List<Uri>) -> Unit
 ) {
     var textState by remember { mutableStateOf(entry?.text ?: "") } // Set initial text to entry's text if available
     val currentDate = remember {
@@ -84,8 +88,7 @@ fun NewEntryScreen(
     var shareMenuExpanded by remember { mutableStateOf(false) }
     var moodMenuExpanded by remember { mutableStateOf(false) }
     var selectedMood by remember { mutableStateOf<String?>(null) } // Store the selected mood
-
-    var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) } // Store the selected image URIs
+    var selectedImages by remember { mutableStateOf<List<Uri>>(pictureUris ?: emptyList()) }
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
@@ -102,6 +105,12 @@ fun NewEntryScreen(
                 textState += matches[0] // Append the recognized text to the existing text
             }
         }
+    }
+
+    entry?.let {
+        textState = it.text
+        selectedMood = it.mood
+        selectedImages = (selectedImages + it.pictureUris).distinct()
     }
 
     val moods = listOf(
@@ -199,13 +208,13 @@ fun NewEntryScreen(
         )
 
         // Selected images preview
-        if (selectedImages.isNotEmpty()) {
+        selectedImages.takeIf { it.isNotEmpty() || entry?.pictureUris?.isNotEmpty() == true }?.let { images ->
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f) // Take half of the available space
             ) {
-                items(selectedImages) { uri ->
+                items(images) { uri ->
                     Image(
                         painter = rememberImagePainter(uri),
                         contentDescription = null,
