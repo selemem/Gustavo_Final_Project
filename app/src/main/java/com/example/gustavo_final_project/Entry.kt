@@ -52,11 +52,6 @@ data class Entry(
         }
     )
 
-    // Convert picture URIs to URI objects for display
-    fun getPicturesUris(): List<Uri> {
-        return pictureUris // Already a list of Uri objects
-    }
-
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(text)
         parcel.writeString(date)
@@ -84,9 +79,9 @@ fun EntryCard(entry: Entry, onItemClick: (Entry) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onItemClick(entry) } // Handle click event
+            .clickable { onItemClick(entry) } // Pass the entry object to onItemClick
             .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp)),
-    ){
+    ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
@@ -109,18 +104,6 @@ fun EntryCard(entry: Entry, onItemClick: (Entry) -> Unit) {
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-
-            // Display images associated with the entry
-            entry.pictureUris.forEach { uri ->
-                Image(
-                    painter = rememberImagePainter(uri),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(100.dp) // Adjust size as needed
-                        .padding(4.dp), // Add padding between images
-                    contentScale = ContentScale.Crop // Crop the image to fit the specified dimensions
-                )
-            }
         }
     }
 }
@@ -131,6 +114,13 @@ fun saveEntries(context: Context, entries: List<Entry>) {
     val gson = Gson()
     val json = gson.toJson(entries)
     editor.putString("entries", json)
+
+    // Save picture URIs for each entry
+    entries.forEachIndexed { index, entry ->
+        val pictureUrisJson = gson.toJson(entry.pictureUris)
+        editor.putString("entry_${index}_picture_uris", pictureUrisJson) // Corrected string interpolation
+    }
+
     editor.apply()
 }
 
@@ -139,5 +129,15 @@ fun loadEntries(context: Context): List<Entry> {
     val gson = Gson()
     val json = sharedPreferences.getString("entries", "")
     val type = object : TypeToken<List<Entry>>() {}.type
-    return gson.fromJson(json, type) ?: emptyList()
+    val entries = (gson.fromJson<List<Entry>>(json, type) ?: emptyList()).toMutableList()
+
+    // Populate picture URIs for each entry
+    entries.forEachIndexed { index, entry ->
+        val pictureUrisJson = sharedPreferences.getString("entry_${index}_picture_uris", "")
+        val type = object : TypeToken<List<Uri>>() {}.type
+        val pictureUris = gson.fromJson<List<Uri>>(pictureUrisJson, type) ?: emptyList()
+        entries[index] = entry.copy(pictureUris = pictureUris)
+    }
+
+    return entries
 }

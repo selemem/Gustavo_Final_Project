@@ -57,7 +57,7 @@ class NewEntryActivity : ComponentActivity() {
         setContent {
             val entry = intent.getParcelableExtra<Entry>("entry")
 
-            // Retrieve picture URIs from intent extras
+// Retrieve picture URIs from intent extras
             val pictureUris = intent.getParcelableArrayListExtra<Uri>("pictureUris")
             Log.d("NewEntryActivity", "Picture URIs: $pictureUris")
 
@@ -213,15 +213,19 @@ fun NewEntryScreen(
         )
 
         // Populate selectedImages with picture URIs from the Entry object
-        if (entry != null && pictureUris.isNullOrEmpty()) {
+        if (entry != null && (pictureUris.isNullOrEmpty() || pictureUris.isEmpty())) {
             selectedImages = entry.pictureUris // Use the picture URIs from the Entry object
+        } else {
+            pictureUris?.let {
+                selectedImages = it // Use the passed picture URIs
+            }
         }
 
         // Log the picture URIs to check if they are valid
         Log.d("PictureURIs", "Picture URIs: $selectedImages")
 
         // Selected images preview
-        selectedImages.takeIf { it.isNotEmpty() || entry?.pictureUris?.isNotEmpty() == true }?.let { images ->
+        selectedImages.takeIf { it.isNotEmpty() }?.let { images ->
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
