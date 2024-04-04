@@ -3,10 +3,14 @@ package com.example.gustavo_final_project
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.ContextThemeWrapper
+import android.view.View
 import android.view.ViewGroup
 import android.widget.CalendarView
+import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,11 +32,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.gustavo_final_project.AppColours.gradientBrush
 import com.google.android.material.datepicker.DayViewDecorator
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -107,13 +115,14 @@ fun CalendarView(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(top = 10.dp)
+            .background(brush = gradientBrush)
     ) {
         // CalendarBox
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
+                .padding(top = 10.dp)
                 .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
         ) {
             CalendarBox(entries = entries) { dateInMillis, filteredEntries ->
@@ -131,18 +140,21 @@ fun CalendarView(
 
 @Composable
 fun CalendarBox(entries: List<Entry>, onDateSelected: (Long, List<Entry>) -> Unit) {
+    val context = LocalContext.current
+
+    val calendarView = remember { CalendarView(context) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .background(Color.White.copy(alpha = 0.10f), shape = RoundedCornerShape(8.dp)),
     ) {
         AndroidView(
-            //modifier = Modifier.matchParentSize(),
             factory = { context ->
-                CalendarView(context).apply {
-                    // Adjust the layout parameters to increase the size of the calendar
+                calendarView.apply {
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        1000 // Adjust the height as needed
+                        ViewGroup.LayoutParams.WRAP_CONTENT
                     )
 
                     setOnDateChangeListener { _, year, month, dayOfMonth ->
@@ -152,9 +164,26 @@ fun CalendarBox(entries: List<Entry>, onDateSelected: (Long, List<Entry>) -> Uni
                         val filteredEntries = filterEntriesForDate(selectedDate, entries)
                         onDateSelected(selectedDate, filteredEntries)
                     }
+
+                    // Set text color for child views
+                    traverseCalendarView(this) { view ->
+                        if (view is TextView) {
+                            view.setTextColor(Color.White.toArgb())
+                        }
+                    }
                 }
             }
         )
+    }
+}
+
+private fun traverseCalendarView(viewGroup: ViewGroup, action: (View) -> Unit) {
+    for (index in 0 until viewGroup.childCount) {
+        val child = viewGroup.getChildAt(index)
+        action(child)
+        if (child is ViewGroup) {
+            traverseCalendarView(child, action)
+        }
     }
 }
 
@@ -174,6 +203,7 @@ fun DisplayEntries(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             fontSize = 20.sp,
+            color = White,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 32.dp, bottom = 16.dp) // Added more space between title and entries
@@ -201,6 +231,7 @@ fun DisplayEntries(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             fontSize = 20.sp,
+            color = White,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)

@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -127,15 +128,17 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 50.dp),
+                .padding(top = 50.dp)
+                .background(brush = AppColours.gradientBrush),
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+
         ) {
             if (entries.isEmpty()) {
                 Text(
                     text = "No moods have been added yet",
                     fontSize = 18.sp,
-                    color = Color.Black
+                    color = Color.White
                 )
             } else {
                 Column(modifier = Modifier.fillMaxWidth()) {

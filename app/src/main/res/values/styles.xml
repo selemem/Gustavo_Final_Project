@@ -3,4 +3,9 @@
     <style name="CalendarDateTextAppearance" parent="@android:style/TextAppearance.Small">
         <item name="android:textColor">#FF0000</item></style>
 
+    <style name="CustomCalendarViewStyle" parent="@android:style/Widget.CalendarView">
+        <item name="android:textColor">#FFFFFF</item> <!-- Set text color to white -->
+    </style>
+
+
 </resources>

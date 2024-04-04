@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,9 +35,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gustavo_final_project.AppColours.gradientBrush
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+@Suppress("DEPRECATION")
 class HomePageActivity : ComponentActivity(), MenuItemClickListener {
     private var showMenu by mutableStateOf(false)
     private lateinit var entries: MutableList<Entry>
@@ -105,45 +108,40 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
         }
     }
 
+    // Define a function to add image URIs to an entry
+    private fun addImageUrisToEntry(entry: Entry, imageUris: List<Uri>?) {
+        imageUris?.let {
+            entry.pictureUris = it
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == NEW_ENTRY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val entryText = data?.getStringExtra("entryText")
             val date = data?.getStringExtra("date")
             val mood = data?.getStringExtra("mood") // Retrieve mood information
+            val imageUris: List<Uri>? = data?.getParcelableArrayListExtra<Uri>("images")
 
             entryText?.let { text ->
                 date?.let { dateStr ->
                     val entry = Entry(text, dateStr, mood) // Include mood in the Entry object
-                    addEntry(entry)// Add the entry
-                    saveEntries(this, entries) // Save the entries
+//                    addImageUrisToEntry(entry, imageUris)
 
+                    addEntry(entry) // Add the entry
+                    saveEntries(this, entries) // Save the entries
 
                     // Update the UI to reflect the new entry
                     entries = loadEntries(this).toMutableList() // Reload entries from SharedPreferences
-                    setContent {
-                        TopBarAndMenu(
-                            title = "Daily Journal",
-                            onMenuClick = { showMenu = !showMenu },
-                            showMenu = showMenu,
-                            onItemClick = this@HomePageActivity::onItemClick
-                        )
 
-                        if (!showMenu) {
-                            HomeContent(entries = entries, onItemClick = this@HomePageActivity::onEntryClick)
-                            AddEntryButton(context = this)
-                        }
-                    }
                 }
             }
         }
     }
-
     companion object {
-        const val NEW_ENTRY_REQUEST_CODE = 1001 // Define your request code
+        const val NEW_ENTRY_REQUEST_CODE = 1001
     }
 }
-
 
 @Composable
 fun AddEntryButton(context: Context) {
@@ -171,6 +169,11 @@ fun AddEntryButton(context: Context) {
 
 @Composable
 fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
+    Box(
+        modifier = Modifier
+            .padding(top = 64.dp, start = 0.dp, end = 0.dp, bottom = 0.dp)
+            .background(brush = gradientBrush) // Change the color as per your requirement
+    ) {
     if (entries.isEmpty()) {
         DefaultContent()
     } else {
@@ -182,7 +185,6 @@ fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 50.dp) // Adjust the top padding as needed
         ) {
             LazyColumn(
                 modifier = Modifier
@@ -190,13 +192,15 @@ fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
                     .padding(16.dp)
             ) {
                 items(sortedEntries) { entry ->
+                    Log.d("HomeContent", "Entry Picture URIs: ${entry.pictureUris}")
                     EntryCard(entry, onItemClick)
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }
         }
     }
-}
+}}
+
 
 
 @Composable
@@ -211,13 +215,13 @@ fun DefaultContent() {
         Text(
             text = "Start journaling",
             fontSize = 24.sp,
-            color = Color.Black
+            color = Color.White
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Add new entries by tapping on the plus button below.",
             fontSize = 16.sp,
-            color = Color.Black,
+            color = Color.White,
             textAlign = TextAlign.Center
         )
     }
@@ -228,7 +232,6 @@ fun DefaultContent() {
 fun PreviewHomePage() {
     val dummyMenuItemClickListener = object : MenuItemClickListener {
         override fun onItemClick(item: String) {
-            // No action needed for preview
         }
     }
 

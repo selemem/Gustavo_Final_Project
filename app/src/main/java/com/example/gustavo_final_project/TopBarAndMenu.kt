@@ -2,6 +2,7 @@ package com.example.gustavo_final_project
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
@@ -20,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -32,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,39 +51,46 @@ fun TopBarAndMenu(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Create,
-                            contentDescription = null,
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-                        Text(
-                            text = title,
-                            fontSize = 20.sp,
-                            color = Color.Black
-                        )
-                    }
-                },
-                actions = {
+            Box(
+                modifier = Modifier
+                    .background(Color(android.graphics.Color.parseColor("#240743"))) // Change background color here
+                    .padding(8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Create,
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 8.dp),
+                        tint = White
+                    )
+                    Text(
+                        text = title,
+                        fontSize = 20.sp,
+                        color = White
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
                     if (showMenu) {
                         IconButton(onClick = onMenuClick) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Close"
+                                contentDescription = "Close",
+                                tint = White
                             )
                         }
                     } else {
                         IconButton(onClick = onMenuClick) {
                             Icon(
                                 imageVector = Icons.Default.Menu,
-                                contentDescription = "Menu"
+                                contentDescription = "Menu",
+                                tint = White
                             )
                         }
                     }
                 }
-            )
+            }
         },
         content = {
             if (showMenu) {
@@ -88,6 +99,7 @@ fun TopBarAndMenu(
         }
     )
 }
+
 
 @Composable
 fun SideBarMenu(
@@ -99,7 +111,7 @@ fun SideBarMenu(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(brush = AppColours.gradientBrush)
             .padding(top = 68.dp, start = 0.dp, end = 0.dp, bottom = 0.dp)
     ) {
         options.forEach { option ->
@@ -121,7 +133,8 @@ fun SideBarMenu(
                 Text(
                     text = option,
                     fontSize = 20.sp,
-                    textAlign = TextAlign.Start
+                    textAlign = TextAlign.Start,
+                    color = White
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))

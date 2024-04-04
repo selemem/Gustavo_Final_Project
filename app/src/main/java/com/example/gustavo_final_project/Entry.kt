@@ -6,6 +6,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,7 +43,7 @@ data class Entry(
     val text: String,
     val date: String,
     val mood: String? = null,
-    val pictureUris: List<Uri> = emptyList()
+    var pictureUris: List<Uri> = emptyList()
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readString() ?: "",
@@ -80,28 +82,29 @@ fun EntryCard(entry: Entry, onItemClick: (Entry) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onItemClick(entry) } // Pass the entry object to onItemClick
-            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp)),
+            .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
+            .background(Color.White.copy(alpha = 0.10f), shape = RoundedCornerShape(8.dp)),
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = entry.date, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(text = entry.date, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = White,)
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 entry.mood?.let { mood ->
                     Text(
                         text = mood,
                         fontSize = 24.sp,
-                        modifier = Modifier.padding(end = 8.dp)
+                        modifier = Modifier.padding(end = 8.dp),
                     )
                 }
                 Text(
                     text = entry.text,
                     fontSize = 14.sp,
                     maxLines = 2, // Limit to one line
-                    overflow = TextOverflow.Ellipsis // Truncate overflowed text with ellipsis
-                )
+                    overflow = TextOverflow.Ellipsis, // Truncate overflowed text with ellipsis
+                    color = White,)
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
