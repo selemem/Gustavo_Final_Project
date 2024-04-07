@@ -1,6 +1,7 @@
 package com.example.gustavo_final_project
 
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import android.view.ContextThemeWrapper
@@ -147,7 +148,7 @@ fun CalendarBox(entries: List<Entry>, onDateSelected: (Long, List<Entry>) -> Uni
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White.copy(alpha = 0.10f), shape = RoundedCornerShape(8.dp)),
+            .background(Color.White.copy(alpha = 0.8f), shape = RoundedCornerShape(8.dp)),
     ) {
         AndroidView(
             factory = { context ->
@@ -165,12 +166,10 @@ fun CalendarBox(entries: List<Entry>, onDateSelected: (Long, List<Entry>) -> Uni
                         onDateSelected(selectedDate, filteredEntries)
                     }
 
-                    // Set text color for child views
-                    traverseCalendarView(this) { view ->
-                        if (view is TextView) {
-                            view.setTextColor(Color.White.toArgb())
-                        }
-                    }
+                    // Get the day number TextView and set its text color
+                    val dayNumbersId = Resources.getSystem().getIdentifier("numberpicker_input", "id", "android")
+                    val dayNumbersTextView = findViewById<TextView>(dayNumbersId)
+                    dayNumbersTextView?.setTextColor(Color.White.toArgb())
                 }
             }
         )
@@ -186,7 +185,6 @@ private fun traverseCalendarView(viewGroup: ViewGroup, action: (View) -> Unit) {
         }
     }
 }
-
 
 fun filterEntriesForDate(selectedDate: Long, entries: List<Entry>): List<Entry> {
     val formattedSelectedDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date(selectedDate))

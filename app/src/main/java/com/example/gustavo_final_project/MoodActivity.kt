@@ -133,7 +133,7 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
 
-        ) {
+            ) {
             if (entries.isEmpty()) {
                 Text(
                     text = "No moods have been added yet",
@@ -147,7 +147,8 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                            .background(Color.White.copy(alpha = 0.10f))
+                            .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
                             .padding(16.dp)
                     ) {
                         TotalReactionsBox(totalCount)
@@ -156,7 +157,8 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                            .background(Color.White.copy(alpha = 0.10f))
+                            .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
                             .padding(16.dp)
                     ) {
                         BarGraph(moodData)
@@ -165,7 +167,8 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
-                            .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
+                            .background(Color.White.copy(alpha = 0.10f))
+                            .border(1.dp, Color.White, shape = RoundedCornerShape(8.dp))
                             .padding(16.dp)
                     ) {
                         LineChart(moodData)
@@ -181,20 +184,20 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
 
 @Composable
 fun TotalReactionsBox(totalCount: Int) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "Total reactions: ",
-                fontSize = 24.sp,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "$totalCount",
-                fontSize = 20.sp,
-                color = Color.Black
-            )
-        }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = "Total reactions: ",
+            fontSize = 24.sp,
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "$totalCount",
+            fontSize = 20.sp,
+            color = Color.White
+        )
     }
+}
 
 
 @Composable
@@ -231,6 +234,7 @@ fun BarGraph(moodData: MoodData) {
                 Text(
                     text = count.toString(),
                     fontSize = 18.sp,
+                    color = Color.White,
                     modifier = Modifier.padding(start = 8.dp) // Add padding between the bar and the count
                 )
             }
@@ -260,14 +264,14 @@ fun LineChart(moodData: MoodData) {
         }
 
         drawLine(
-            color = Color.Black,
+            color = Color.White,
             start = Offset(0f, graphHeight),
             end = Offset(graphWidth, graphHeight),
             strokeWidth = 2f
         )
 
         drawLine(
-            color = Color.Black,
+            color = Color.White,
             start = Offset(0f, 0f),
             end = Offset(0f, graphHeight),
             strokeWidth = 2f
@@ -276,7 +280,7 @@ fun LineChart(moodData: MoodData) {
         points.forEachIndexed { index, point ->
             if (index < points.size - 1) {
                 drawLine(
-                    color = Color.Black,
+                    color = Color.White,
                     start = point,
                     end = points[index + 1],
                     strokeWidth = 8f // Increase the thickness of the line
@@ -289,7 +293,7 @@ fun LineChart(moodData: MoodData) {
 
             // Draw a line from the point to the count at the bottom with bottom padding
             drawLine(
-                color = Color.Black,
+                color = Color.White,
                 start = Offset(point.x, point.y),
                 end = Offset(point.x, graphHeight + 20f), // Add bottom padding of 20f
                 strokeWidth = 2f
@@ -297,7 +301,7 @@ fun LineChart(moodData: MoodData) {
 
             drawIntoCanvas { canvas ->
                 val paint = android.graphics.Paint().apply { // Specify the Android Paint class
-                    color = Color.Black.toArgb()
+                    color = Color.White.toArgb()
                     textSize = 60f // Adjust the size of the text
                 }
                 // Draw emoji above the count

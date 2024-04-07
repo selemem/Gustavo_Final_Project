@@ -97,6 +97,8 @@ dependencies {
     implementation ("androidx.compose.material:material:1.6.2")
 
     implementation ("com.google.accompanist:accompanist-coil:0.15.0")
+    implementation ("com.google.android.material:material:1.4.0")
+
 
 
 }
