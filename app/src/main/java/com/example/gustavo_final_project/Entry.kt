@@ -89,7 +89,7 @@ fun EntryCard(entry: Entry, onItemClick: (Entry) -> Unit) {
             modifier = Modifier.padding(16.dp)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = entry.date, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = White,)
+            Text(text = entry.date, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = White,)
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 entry.mood?.let { mood ->
@@ -101,7 +101,7 @@ fun EntryCard(entry: Entry, onItemClick: (Entry) -> Unit) {
                 }
                 Text(
                     text = entry.text,
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     maxLines = 2, // Limit to one line
                     overflow = TextOverflow.Ellipsis, // Truncate overflowed text with ellipsis
                     color = White,)

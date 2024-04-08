@@ -1,5 +1,6 @@
 package com.example.gustavo_final_project
 
+import android.R
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -37,6 +38,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.White
+import androidx.compose.ui.res.fontResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,16 +67,18 @@ fun TopBarAndMenu(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.AutoStories,
-                        contentDescription = null,
-                        modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-                        tint = White
-                    )
+//                    Icon(
+//                        imageVector = Icons.Default.AutoStories,
+//                        contentDescription = null,
+//                        modifier = Modifier.padding(start = 8.dp, end = 8.dp),
+//                        tint = White
+//                    )
                     Text(
+                        modifier = Modifier.padding(start = 8.dp, top = 8.dp),
                         text = title,
-                        fontSize = 20.sp,
-                        color = White
+                        fontSize = 22.sp,
+                        color = White,
+                        fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     if (showMenu) {
@@ -101,7 +109,6 @@ fun TopBarAndMenu(
     )
 }
 
-
 @Composable
 fun SideBarMenu(
     onItemClick: (String) -> Unit // Accepts the click events for each menu item
@@ -113,7 +120,7 @@ fun SideBarMenu(
         modifier = Modifier
             .fillMaxSize()
             .background(brush = AppColours.gradientBrush)
-            .padding(top = 68.dp, start = 0.dp, end = 0.dp, bottom = 0.dp)
+            .padding(top = 75.dp, start = 0.dp, end = 0.dp, bottom = 0.dp)
     ) {
         options.forEach { option ->
             val isSelected = option == selectedOption
@@ -133,7 +140,7 @@ fun SideBarMenu(
             ) {
                 Text(
                     text = option,
-                    fontSize = 20.sp,
+                    fontSize = 22.sp,
                     textAlign = TextAlign.Start,
                     color = White
                 )

@@ -98,6 +98,7 @@ dependencies {
 
     implementation ("com.google.accompanist:accompanist-coil:0.15.0")
     implementation ("com.google.android.material:material:1.4.0")
+    implementation ("androidx.compose.ui:ui-text-google-fonts:1.6.5")
 
 
 

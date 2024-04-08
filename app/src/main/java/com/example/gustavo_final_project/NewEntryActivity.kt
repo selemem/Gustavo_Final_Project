@@ -206,7 +206,7 @@ fun NewEntryScreen(
                 ) {
                     Text(
                         text = "Today I'm feeling: $mood",
-                        fontSize = 24.sp,
+                        fontSize = 22.sp,
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(16.dp)
@@ -329,8 +329,10 @@ fun NewEntryScreen(
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                             Row(
-                                modifier = Modifier.horizontalScroll(rememberScrollState()),
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                modifier = Modifier
+                                    .horizontalScroll(rememberScrollState())
+                                    .padding(horizontal= 16.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 moods.forEach { (emoji, mood) ->
                                     IconButton(
@@ -342,9 +344,10 @@ fun NewEntryScreen(
                                         Text(
                                             text = emoji,
                                             fontSize = 36.sp,
-                                            modifier = Modifier.size(72.dp),
+                                            modifier = Modifier
+                                                .size(72.dp),
                                             textAlign = TextAlign.Center,
-                                            color = Color.Black
+                                            color = Color.Black,
                                         )
                                     }
                                 }
@@ -376,7 +379,7 @@ fun ShareOptionsDropdown(
     // Popup to close when clicking outside
     Popup(
         alignment = Alignment.TopStart,
-        offset = IntOffset(450, 70),
+        offset = IntOffset(420, 70),
         onDismissRequest = onDismissRequest
     ) {
         Card(
@@ -396,7 +399,8 @@ fun ShareOptionsDropdown(
                     ) {
                         Text(
                             text = option,
-                            style = TextStyle(color = White) // Set text color to white
+                            style = TextStyle(color = White), // Set text color to white
+                            fontSize = 16.sp,
                         )
                     }
                 }

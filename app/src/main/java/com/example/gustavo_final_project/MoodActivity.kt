@@ -128,7 +128,7 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 50.dp)
+                .padding(top = 64.dp)
                 .background(brush = AppColours.gradientBrush),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -137,7 +137,7 @@ fun MoodContent(entries: List<Entry>, showMenu: Boolean) {
             if (entries.isEmpty()) {
                 Text(
                     text = "No moods have been added yet",
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     color = Color.White
                 )
             } else {
@@ -187,7 +187,7 @@ fun TotalReactionsBox(totalCount: Int) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = "Total reactions: ",
-            fontSize = 24.sp,
+            fontSize = 22.sp,
             color = Color.White,
             fontWeight = FontWeight.Bold
         )
@@ -228,7 +228,7 @@ fun BarGraph(moodData: MoodData) {
                     modifier = Modifier
                         .weight(1f) // Ensure the bar takes the remaining space
                         .height(18.dp) // Adjust the height as needed for thicker bars
-                        .clip(RoundedCornerShape(8.dp)) // Round the corners
+                        .clip(RoundedCornerShape(8.dp))// Round the corners
                 )
                 // Display the count of occurrences
                 Text(

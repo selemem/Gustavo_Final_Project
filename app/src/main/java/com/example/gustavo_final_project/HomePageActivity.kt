@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,7 +51,7 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
 
         setContent {
             TopBarAndMenu(
-                title = "Daily Journal",
+                title = "Journal",
                 onMenuClick = { showMenu = !showMenu },
                 showMenu = showMenu,
                 onItemClick = this@HomePageActivity::onItemClick
@@ -214,8 +215,9 @@ fun DefaultContent() {
     ) {
         Text(
             text = "Start journaling",
-            fontSize = 24.sp,
-            color = Color.White
+            fontSize = 20.sp,
+            color = Color.White,
+            fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(

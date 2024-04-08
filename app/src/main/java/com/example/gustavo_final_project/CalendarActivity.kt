@@ -228,7 +228,7 @@ fun DisplayEntries(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
             text = "No entries added to this day",
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            fontSize = 20.sp,
+            fontSize = 16.sp,
             color = White,
             modifier = Modifier
                 .fillMaxWidth()
