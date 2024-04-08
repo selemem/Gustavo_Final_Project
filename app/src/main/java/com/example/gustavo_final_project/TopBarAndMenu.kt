@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Menu
@@ -61,9 +62,9 @@ fun TopBarAndMenu(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Create,
+                        imageVector = Icons.Default.AutoStories,
                         contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp),
+                        modifier = Modifier.padding(start = 8.dp, end = 8.dp),
                         tint = White
                     )
                     Text(
