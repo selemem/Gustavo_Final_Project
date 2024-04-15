@@ -65,27 +65,28 @@ class MoodActivity : ComponentActivity(), MenuItemClickListener {
             val updateEntriesFlag = intent.getBooleanExtra("updateEntries", false)
             if (updateEntriesFlag) {
                 val mood = intent.getStringExtra("mood")
-                mood?.let { moodValue ->
-                    updateMoodData()
-                }
+                updateMoodData(mood)
             }
 
             MoodContent(entries = entries, showMenu = showMenu)
         }
     }
 
-    private fun updateMoodData() {
-        // Clear existing entries before updating
-        entries.clear()
+    private fun updateMoodData(mood: String?) {
+        // Check if mood is not null before updating the data
+        mood?.let {
+            // Clear existing entries before updating
+            entries.clear()
 
-        // Load entries from SharedPreferences
-        val updatedEntries = loadEntries(this)
+            // Load entries from SharedPreferences
+            val updatedEntries = loadEntries(this)
 
-        // Add all loaded entries to the entries list
-        entries.addAll(updatedEntries)
+            // Add all loaded entries to the entries list
+            entries.addAll(updatedEntries)
 
-        // Save updated entries to SharedPreferences
-        saveEntriesToSharedPreferences(entries)
+            // Save updated entries to SharedPreferences
+            saveEntriesToSharedPreferences(entries)
+        }
     }
 
 
