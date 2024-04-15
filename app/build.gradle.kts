@@ -100,6 +100,7 @@ dependencies {
     implementation ("com.google.android.material:material:1.4.0")
     implementation ("androidx.compose.ui:ui-text-google-fonts:1.6.5")
 
+    implementation ("androidx.compose.foundation:foundation:1.6.5")
 
 
 }

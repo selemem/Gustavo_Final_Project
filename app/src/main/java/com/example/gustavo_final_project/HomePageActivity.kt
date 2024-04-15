@@ -58,24 +58,31 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
             )
 
             if (!showMenu) {
-                HomeContent(entries = entries, onItemClick = this@HomePageActivity::onEntryClick)
+                HomeContent(
+                    entries = entries,
+                    onItemClick = this@HomePageActivity::onEntryClick,
+                    onDeleteClick = { entry ->
+                        // Define the behavior for onDeleteClick here
+                        // For example, you can remove the entry from the list and update the UI
+                        entries.remove(entry)
+                        saveEntries(this@HomePageActivity, entries)
+                    }
+                )
                 AddEntryButton(context = this)
             }
         }
+
     }
 
-    // Method to add an entry
     private fun addEntry(entry: Entry) {
         entries.add(entry)
         saveEntries(this, entries)
-        // If mood is not null, update the mood data in MoodActivity
         entry.mood?.let { mood ->
             updateMoodDataInMoodActivity(mood)
         }
     }
 
     private fun updateMoodDataInMoodActivity(mood: String) {
-        // Only start the activity if mood is not null
         if (mood.isNotEmpty()) {
             val intent = Intent(this, MoodActivity::class.java)
             intent.putExtra("updateEntries", true)
@@ -85,12 +92,8 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
     }
 
     private fun onEntryClick(entry: Entry) {
-        // Log picture URIs before passing to NewEntryActivity
-        Log.d("EntryClick", "Picture URIs: ${entry.pictureUris}")
-
         val intent = Intent(this, NewEntryActivity::class.java)
         intent.putExtra("entry", entry)
-        // Pass picture URIs to NewEntryActivity as ParcelableArrayList<Uri>
         intent.putParcelableArrayListExtra("pictureUris", ArrayList(entry.pictureUris))
         startActivity(intent)
     }
@@ -109,40 +112,33 @@ class HomePageActivity : ComponentActivity(), MenuItemClickListener {
         }
     }
 
-    // Define a function to add image URIs to an entry
-    private fun addImageUrisToEntry(entry: Entry, imageUris: List<Uri>?) {
-        imageUris?.let {
-            entry.pictureUris = it
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == NEW_ENTRY_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             val entryText = data?.getStringExtra("entryText")
             val date = data?.getStringExtra("date")
-            val mood = data?.getStringExtra("mood") // Retrieve mood information
+            val mood = data?.getStringExtra("mood")
             val imageUris: List<Uri>? = data?.getParcelableArrayListExtra<Uri>("images")
 
             entryText?.let { text ->
                 date?.let { dateStr ->
-                    val entry = Entry(text, dateStr, mood) // Include mood in the Entry object
-//                    addImageUrisToEntry(entry, imageUris)
-
-                    addEntry(entry) // Add the entry
-                    saveEntries(this, entries) // Save the entries
-
-                    // Update the UI to reflect the new entry
-                    entries = loadEntries(this).toMutableList() // Reload entries from SharedPreferences
-
+                    val entry = Entry(text, dateStr, mood)
+                    addEntry(entry)
                 }
             }
         }
     }
+
+    private fun deleteEntry(entry: Entry) {
+        entries.remove(entry)
+        saveEntries(this, entries)
+    }
+
     companion object {
         const val NEW_ENTRY_REQUEST_CODE = 1001
     }
 }
+
 
 @Composable
 fun AddEntryButton(context: Context) {
@@ -169,7 +165,7 @@ fun AddEntryButton(context: Context) {
 }
 
 @Composable
-fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
+fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit, onDeleteClick: (Entry) -> Unit) {
     Box(
         modifier = Modifier
             .padding(top = 64.dp, start = 0.dp, end = 0.dp, bottom = 0.dp)
@@ -192,9 +188,11 @@ fun HomeContent(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                items(sortedEntries) { entry ->
+                items(sortedEntries, key = { entry -> entry.hashCode() }) { entry ->
                     Log.d("HomeContent", "Entry Picture URIs: ${entry.pictureUris}")
-                    EntryCard(entry, onItemClick)
+                    EntryCard(entry, onItemClick) {
+                        onDeleteClick(entry)
+                    }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
             }

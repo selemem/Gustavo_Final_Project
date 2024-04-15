@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,9 +22,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,7 +86,14 @@ data class Entry(
 }
 
 @Composable
-fun EntryCard(entry: Entry, onItemClick: (Entry) -> Unit) {
+fun EntryCard(
+    entry: Entry,
+    onItemClick: (Entry) -> Unit,
+    onDeleteClick: (Entry) -> Unit // Change onDeleteClick lambda parameter to accept Entry
+) {
+    // State to control the visibility of the delete confirmation dialog
+    val showDialog = remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -88,9 +104,20 @@ fun EntryCard(entry: Entry, onItemClick: (Entry) -> Unit) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = entry.date, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = White,)
-            Spacer(modifier = Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = entry.date, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = White,)
+                // Display the delete button
+                IconButton(
+                    onClick = { showDialog.value = true }, // Show the confirmation dialog
+                    modifier = Modifier.padding(end = 16.dp) // Add padding to the end of the IconButton
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Entry",
+                        tint = White
+                    )
+                }
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 entry.mood?.let { mood ->
                     Text(
@@ -104,12 +131,40 @@ fun EntryCard(entry: Entry, onItemClick: (Entry) -> Unit) {
                     fontSize = 16.sp,
                     maxLines = 2, // Limit to one line
                     overflow = TextOverflow.Ellipsis, // Truncate overflowed text with ellipsis
-                    color = White,)
+                    color = White,
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
+
+    // Confirmation dialog for deletion
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text(text = "Delete Entry") },
+            text = { Text("Are you sure you want to delete this entry?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog.value = false
+                        onDeleteClick(entry) // Pass the entry to onDeleteClick
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog.value = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
+
 
 fun saveEntries(context: Context, entries: List<Entry>) {
     val sharedPreferences = context.getSharedPreferences("Entries", Context.MODE_PRIVATE)

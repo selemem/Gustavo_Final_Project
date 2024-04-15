@@ -216,7 +216,8 @@ fun DisplayEntries(entries: List<Entry>, onItemClick: (Entry) -> Unit) {
                 ) {
                     EntryCard(
                         entry = entry,
-                        onItemClick = onItemClick
+                        onItemClick = onItemClick,
+                        onDeleteClick = {} // Provide the onDeleteClick lambda here
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp)) // Add space between EntryCards
